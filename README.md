@@ -1,6 +1,6 @@
-# DMarket API
+# API
 
-DMarket API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes to perform some CRUD operations (Create, Read, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application).  -- The front-end has it own repository, the link for is below --
+This API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes to perform some CRUD operations (Create, Read, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application).  -- The front-end has it own repository, the link for is below --
 
 
 Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
@@ -25,7 +25,7 @@ It's highly recommended to use a virtual environment.
 1. Clone the repository:
    ```
    git clone <repository_url>
-   cd dmarket-api
+   cd RenatoSouza-back-end-mvp
    ```
 
 2. Create virtual environment (Optional): 
