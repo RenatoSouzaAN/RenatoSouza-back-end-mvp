@@ -42,7 +42,7 @@ It's highly recommended to use a virtual environment.
 
 1. Clone the repository:
    ```
-   git clone <repository_url>
+   git clone https://github.com/RenatoSouzaAN/RenatoSouza-back-end-mvp.git
    cd RenatoSouza-back-end-mvp
    ```
 
