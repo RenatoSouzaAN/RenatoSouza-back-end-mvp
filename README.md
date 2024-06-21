@@ -1,9 +1,27 @@
-# API
+# Back-End (API)
 
 This API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes to perform some CRUD operations (Create, Read, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application).  -- The front-end has it own repository, the link for is below --
 
 
 Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
+
+## Table of Contents
+
+- [Features](#features)
+- [Setup](#setup)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Explanation](#explanation)
+- [Running the Server](#running-the-server)
+- [API Documentation](#api-documentation)
+- [API Endpoints](#api-endpoints)
+  - [Get all products](#get-all-products)
+  - [Add a product](#add-a-product)
+  - [Delete a product](#delete-a-product)
+- [Responses](#responses)
+- [Technology Stack](#technology-stack)
+- [Contributors](#contributors)
+- [License](#license)
 
 ## Features
 
