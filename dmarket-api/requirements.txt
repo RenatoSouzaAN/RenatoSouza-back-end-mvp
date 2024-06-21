@@ -1,0 +1,7 @@
+python-dotenv
+Flask
+flask-cors
+Flask-SQLAlchemy
+Flask-Migrate
+flask-swagger-ui
+werkzeug
