@@ -39,3 +39,4 @@ htmlcov/
 # Dependency directories
 env/
 lib/
+migrations/
