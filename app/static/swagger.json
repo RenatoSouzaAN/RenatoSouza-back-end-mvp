@@ -52,7 +52,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/products/create": {
             "post": {
                 "summary": "Add a new product to the 'products' database, through 'Request Body'.",
                 "operationId": "addProduct",
@@ -124,7 +126,7 @@
                 }
             }
         },
-        "/products/{product_id}": {
+        "/products/{product_id}/delete": {
             "delete": {
                 "summary": "Delete a product from the 'products' database.",
                 "operationId": "deleteProduct",

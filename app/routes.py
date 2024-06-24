@@ -26,7 +26,7 @@ def register_routes(app, db):
             return jsonify(products_list), 200
         
 
-    @app.route('/products', methods = ['POST'])
+    @app.route('/products/create', methods = ['POST'])
     def add_product():
         """Add a new product to the 'products' database
 
@@ -63,7 +63,7 @@ def register_routes(app, db):
         db.session.commit()
         return jsonify({'message': 'Product added successfully!'}), 202
 
-    @app.route('/products/<int:product_id>', methods=['DELETE'])
+    @app.route('/products/<int:product_id>/delete', methods=['DELETE'])
     def delete_product(product_id):
         product = Product.query.get(product_id)
         if product:
