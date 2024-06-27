@@ -1,6 +1,6 @@
 # Back-End (API)
 
-This API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes to perform some CRUD operations (Create, Read, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application).  -- The front-end has it own repository, the link for is below --
+This API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes, to perform some CRUD operations (Create, Read, Update, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application).  -- The front-end has it own repository, the link for is below --
 
 
 Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
