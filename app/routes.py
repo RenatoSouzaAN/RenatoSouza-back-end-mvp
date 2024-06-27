@@ -33,26 +33,29 @@ def register_routes(app, db):
         Returns a message if the product was added or an error ocurred.
         """
         data = request.get_json()
-        #Certify that all required fields are filled
         if not data.get('name'):
             return jsonify({'message': 'Name is required'}), 400
-        if not data.get('price'):
-            return jsonify({'message': 'Price is required'}), 400
-        if not data.get('quantity'):
-            return jsonify({'message': 'Quantity is required'}), 400
+        # if not data.get('price'):
+        #     return jsonify({'message': 'Price is required'}), 400
+        # if not data.get('quantity'):
+        #     return jsonify({'message': 'Quantity is required'}), 400
         
-        #Certify that the value inserted in the price field is a number
         try:
             price = float(data['price'])
         except ValueError:
             return jsonify({'message': 'Price must be a number'}), 400
         
-        #Certify that the value inserted in the quantity field is a number
         try:
             quantity = int(data['quantity'])
         except ValueError:
             return jsonify({'message': 'Quantity must be a number'}), 400
+        
+        if price < 1:
+            return jsonify({'message': 'Price must be higher than 0.'}), 400
 
+        if quantity < 1:
+            return jsonify({'message': 'Quantity must be higher than 0.'}), 400
+        
         new_product = Product(
             name = data['name'],
             description = data.get('description', ''),
@@ -62,12 +65,45 @@ def register_routes(app, db):
         db.session.add(new_product)
         db.session.commit()
         return jsonify({'message': 'Product added successfully!'}), 202
+      
+    @app.route('/products/<int:product_id>/update', methods=['PUT'])
+    def update_product(product_id):
+        product = Product.query.get(product_id)
+        if not product:
+            return jsonify({'message': 'Product not found.'}), 404
+        
+        data = request.get_json()
+        
+        if 'description' in data:
+            product.description = data['description']
+        if 'price' in data:
+            try:
+                product.price = float(data['price'])
+                price = product.price
+                if price < 1:
+                    return jsonify({'message': 'Price must be higher than 0.'}), 400
+                # product.price = price
+            except ValueError:
+                return jsonify({'message': 'Price must be a number.'}), 400
+        if 'quantity' in data:
+            try:
+                product.quantity = int(data['quantity'])
+                quantity = product.quantity
+                if quantity < 1:
+                    return jsonify({'message': 'Quantity must be higher than 0.'}), 400
+                # product.quantity = quantity
+            except ValueError:
+                return jsonify({'message': 'Price must be a number.'}), 400
+            
+        db.session.commit()
+        return jsonify({'message': 'Product updated successfully.'}), 203
 
+    
     @app.route('/products/<int:product_id>/delete', methods=['DELETE'])
     def delete_product(product_id):
         product = Product.query.get(product_id)
         if product:
             db.session.delete(product)
             db.session.commit()
-            return '', 204
+            return '', 203
         return jsonify({'message': 'Product not found'}), 404

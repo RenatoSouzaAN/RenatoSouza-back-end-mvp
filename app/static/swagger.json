@@ -73,7 +73,7 @@
                     }
                 },
                 "responses": {
-                    "201": {
+                    "202": {
                         "description": "Product added successfully to the 'products' database."
                     },
                     "400": {
@@ -118,10 +118,141 @@
                                         "value": {
                                             "message": "Quantity must be an integer"
                                         }
+                                    },
+                                    "PriceTooLow": {
+                                        "summary": "Price too low",
+                                        "value": {
+                                            "message": "Price must be higher than 0"
+                                        }
+                                    },
+                                    "QuantityTooLow": {
+                                        "summary": "Quantity too low",
+                                        "value": {
+                                            "message": "Quantity must be higher than 0"
+                                        }
                                     }
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/products/{product_id}/update":{
+            "put": {
+                "summary": "Update an existing product's description, price, and quantity in the 'products' database, through 'Request Body'.",
+                "operationId": "updateProduct",
+                "description": "All three elements are optional. Returns a message if the product was updated or an error ocurred.",
+                "tags": [
+                    "Products"
+                ],
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "$ref":"#/components/schemas/ProductUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Product updated successfully in the 'products' database.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Success": {
+                                        "summary": "Update successful",
+                                        "value": {
+                                            "message": "Product updated successfully!"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "InvalidPrice": {
+                                        "summary": "Invalid price",
+                                        "value": {
+                                            "message": "Price must be a number"
+                                        }
+                                    },
+                                    "InvalidQuantity": {
+                                        "summary": "Invalid quantity",
+                                        "value": {
+                                            "message": "Quantity must be an integer"
+                                        }
+                                    },
+                                    "PriceTooLow": {
+                                        "summary": "Price too low",
+                                        "value": {
+                                            "message": "Price must be higher than 0"
+                                        }
+                                    },
+                                    "QuantityTooLow": {
+                                        "summary": "Quantity too low",
+                                        "value": {
+                                            "message": "Quantity must be higher than 0"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404":{
+                        "description": "Product not found in the 'products' database.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "NotFound": {
+                                        "summary": "Product not found",
+                                        "value": {
+                                            "message": "Product not found"
+                                        }
+                                    }
+                                }
+                            }
+                        } 
                     }
                 }
             }
@@ -215,6 +346,25 @@
                     "price",
                     "quantity"
                 ]
+            },
+            "ProductUpdate": {
+                "type": "object",
+                "description": "This is the schema used for the 'PUT' Method. It allows updating the 'description', 'price', and 'quantity' of a product.",
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "description": "The product description."
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "description": "The product price."
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "description": "The product quantity."
+                    }
+                }
             }
         }
     }
