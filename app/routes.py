@@ -105,5 +105,5 @@ def register_routes(app, db):
         if product:
             db.session.delete(product)
             db.session.commit()
-            return '', 203
+            return jsonify({'message': 'Product updated successfully.'}), 204
         return jsonify({'message': 'Product not found'}), 404
