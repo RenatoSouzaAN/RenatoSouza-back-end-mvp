@@ -275,11 +275,51 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "Product deleted successfully from the 'products' database."
+                    "200": {  
+                        "description": "Product deleted successfully from the 'products' database.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Success": {
+                                        "summary": "Product deleted successfully.",
+                                        "value": {
+                                            "message": "Product deleted successfully."
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Product not found in the 'products' database."
+                        "description": "Product not found in the 'products' database.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "NotFound": {
+                                        "summary": "Product not found",
+                                        "value": {
+                                            "message": "Product not found"
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
