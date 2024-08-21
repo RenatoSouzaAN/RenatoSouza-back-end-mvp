@@ -107,23 +107,28 @@ The API will be accessible at `http://localhost:5000`.
 
 ### API Documentation
 
-Swagger UI is integrated for API documentation. Visit `http://localhost:5000/swagger` after starting the server to explore the API endpoints and interact with them. You can also visit `http://localhost:5000/` and be redirected to the Swagger UI.
+OpenAPI 3 is integrated for API documentation. After starting the server, visit http://localhost:5000/openapi to explore the API endpoints and interact with them.
 
 ## API Endpoints
 
 ### Get all products
 
--   **GET** `/products`
+-   **GET** `/api/products`
     -   Returns a list of all products in the database.
 
 ### Add a product
 
--   **POST** `/products`
+-   **POST** `/api/products/create`
     -   Adds a new product to the database. Requires JSON payload with `name`, `price`, and `quantity`.
+
+### Update a product
+
+-   **POST** `/api/products/<product_id>/update`
+    -   Upgrades the product with the specified `product_id` from the database. Requires a JSON payload with any of the following fields: description, price, or quantity.
 
 ### Delete a product
 
--   **DELETE** `/products/<product_id>`
+-   **DELETE** `/api/products/<product_id>/delete`
     -   Deletes the product with the specified `product_id` from the database.
 
 ## Responses
@@ -137,7 +142,7 @@ Swagger UI is integrated for API documentation. Visit `http://localhost:5000/swa
 -   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask
 -   **Flask-Migrate**: Database migrations for Flask applications
 -   **Flask-CORS**: CORS support for Flask
--   **Flask-Swagger-UI**: Swagger UI integration for API documentation
+-   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation
 
 ## Contributors
 
