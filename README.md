@@ -1,97 +1,106 @@
 # Back-End (API)
 
-This API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes, to perform some CRUD operations (Create, Read, Update, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application).  -- The front-end has it own repository, the link for is below --
-
+This API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes, to perform some CRUD operations (Create, Read, Update, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application). -- The front-end has it own repository, the link for is below --
 
 Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 
 ## Table of Contents
 
-- [Features](#features)
-- [Setup](#setup)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Explanation](#explanation)
-- [Running the Server](#running-the-server)
-- [API Documentation](#api-documentation)
-- [API Endpoints](#api-endpoints)
-  - [Get all products](#get-all-products)
-  - [Add a product](#add-a-product)
-  - [Delete a product](#delete-a-product)
-- [Responses](#responses)
-- [Technology Stack](#technology-stack)
-- [Contributors](#contributors)
-- [License](#license)
+-   [Features](#features)
+-   [Setup](#setup)
+    -   [Prerequisites](#prerequisites)
+    -   [Installation](#installation)
+    -   [Explanation](#explanation)
+-   [Running the Server](#running-the-server)
+-   [API Documentation](#api-documentation)
+-   [API Endpoints](#api-endpoints)
+    -   [Get all products](#get-all-products)
+    -   [Add a product](#add-a-product)
+    -   [Delete a product](#delete-a-product)
+-   [Responses](#responses)
+-   [Technology Stack](#technology-stack)
+-   [Contributors](#contributors)
+-   [License](#license)
 
 ## Features
 
-- List all products
-- Add a new product
-- Delete a product
+-   List all products
+-   Add a new product
+-   Delete a product
 
 ## Setup
 
 ### Prerequisites
 
-- Python 3.x installed
-- Pip package manager
+-   Python 3.x installed
+-   Pip package manager
 
 ### Installation
 
 It's highly recommended to use a virtual environment.
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/RenatoSouzaAN/RenatoSouza-back-end-mvp.git
-   cd RenatoSouza-back-end-mvp
-   ```
 
-2. Create virtual environment (Optional): 
-   ```
-   python -m venv env
-   ```
+    ```
+    git clone https://github.com/RenatoSouzaAN/RenatoSouza-back-end-mvp.git
+    cd RenatoSouza-back-end-mvp
+    ```
 
-3. Access virtual environment (Optional): 
-   
-   On Powershell:
-   ```
-   .\env\Scripts\activate
-   ```
-   On bash:
-   ```
-   source \env\Scripts\activate
-   ```
+2. Create virtual environment (Optional):
+
+    ```
+    python -m venv env
+    ```
+
+3. Access virtual environment (Optional):
+
+    On Powershell:
+
+    ```
+    .\env\Scripts\activate
+    ```
+
+    On bash:
+
+    ```
+    source \env\Scripts\activate
+    ```
 
 4. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+
+    ```
+    pip install -r requirements.txt
+    ```
 
 5. Set up the database:
-   ```
-   flask db init
-   flask db migrate
-   flask db upgrade
-   ```
-
+    ```
+    flask db init
+    flask db migrate
+    flask db upgrade
+    ```
 
 ### Explanation:
 
 These commands (`flask db init`, `flask db migrate`, `flask db upgrade`) are used with Flask-Migrate to initialize a migrations directory, generate migration scripts based on changes in your models, and apply those migrations to your database schema.
 
-- **`flask db init`**: Initializes a new migration repository in your project, creating a `migrations` directory where migration scripts will be stored.
-  
-- **`flask db migrate`**: Analyzes the current state of your models and generates a migration script that outlines the changes needed to synchronize the database schema with the current state of your models.
-  
-- **`flask db upgrade`**: Applies the migration script to the database, making the necessary changes to the schema to reflect the changes in your models.
+-   **`flask db init`**: Initializes a new migration repository in your project, creating a `migrations` directory where migration scripts will be stored.
+-   **`flask db migrate`**: Analyzes the current state of your models and generates a migration script that outlines the changes needed to synchronize the database schema with the current state of your models.
+-   **`flask db upgrade`**: Applies the migration script to the database, making the necessary changes to the schema to reflect the changes in your models.
 
 These steps are crucial whenever you make changes to your database models (`models.py` in this case) to ensure that your database schema stays up-to-date with your application's data model.
 
 ### Running the Server
 
 To start the Flask server:
+
 ```
 flask run
+```
+
+or
+
+```
+python run.py
 ```
 
 The API will be accessible at `http://localhost:5000`.
@@ -104,35 +113,35 @@ Swagger UI is integrated for API documentation. Visit `http://localhost:5000/swa
 
 ### Get all products
 
-- **GET** `/products`
-  - Returns a list of all products in the database.
+-   **GET** `/products`
+    -   Returns a list of all products in the database.
 
 ### Add a product
 
-- **POST** `/products`
-  - Adds a new product to the database. Requires JSON payload with `name`, `price`, and `quantity`.
+-   **POST** `/products`
+    -   Adds a new product to the database. Requires JSON payload with `name`, `price`, and `quantity`.
 
 ### Delete a product
 
-- **DELETE** `/products/<product_id>`
-  - Deletes the product with the specified `product_id` from the database.
+-   **DELETE** `/products/<product_id>`
+    -   Deletes the product with the specified `product_id` from the database.
 
 ## Responses
 
-- Successful responses include appropriate HTTP status codes and JSON payloads.
-- Error responses provide meaningful error messages and status codes.
+-   Successful responses include appropriate HTTP status codes and JSON payloads.
+-   Error responses provide meaningful error messages and status codes.
 
 ## Technology Stack
 
-- **Flask**: Micro web framework for Python
-- **Flask-SQLAlchemy**: SQLAlchemy extension for Flask
-- **Flask-Migrate**: Database migrations for Flask applications
-- **Flask-CORS**: CORS support for Flask
-- **Flask-Swagger-UI**: Swagger UI integration for API documentation
+-   **Flask**: Micro web framework for Python
+-   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask
+-   **Flask-Migrate**: Database migrations for Flask applications
+-   **Flask-CORS**: CORS support for Flask
+-   **Flask-Swagger-UI**: Swagger UI integration for API documentation
 
 ## Contributors
 
-- Renato Souza de Almeida Neto <renatosouza.an@gmail.com>
+-   Renato Souza de Almeida Neto <renatosouza.an@gmail.com>
 
 ## License
 
