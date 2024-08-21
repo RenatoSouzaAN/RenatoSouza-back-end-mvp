@@ -3,5 +3,5 @@ Flask
 flask-cors
 Flask-SQLAlchemy
 Flask-Migrate
-flask-swagger-ui
+flask-openapi3
 werkzeug
