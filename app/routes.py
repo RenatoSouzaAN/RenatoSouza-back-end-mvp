@@ -1,4 +1,8 @@
-from flask import jsonify
+from flask import jsonify, redirect, request, url_for, session, current_app
+from urllib.parse import urlencode
+from . import oauth
+from .auth import requires_auth
+from config import Config
 from flask_openapi3 import APIBlueprint, Tag
 from pydantic import BaseModel
 
@@ -6,7 +10,7 @@ from .models import Product
 from .schemas import ProductInput, GetProduct, ProductUpdate, MessageResponse
 from . import db
 
-api = APIBlueprint('api', __name__, url_prefix='/api')
+api = APIBlueprint('api', __name__)
 
 product_tag = Tag(name='product', description='Product operations')
 
@@ -65,6 +69,7 @@ class ProductIdPath(BaseModel):
         },
     }
 )
+
 def get_products():
     """Get all products"""
     products = Product.query.all()
@@ -84,6 +89,7 @@ def get_products():
     return jsonify(products_list), 200
 
 @api.post('/products/create', tags=[product_tag], summary="Add a new product to the 'products' database, through 'Request Body'.",
+    security=[{"bearerAuth": []}],
     description="Add a new product to the database by providing the required fields (name, price, and quantity).", 
     responses={
         202: {"description": "Product added successfully to the 'products' database."},
@@ -155,6 +161,7 @@ def get_products():
         }
     }
 )
+@requires_auth
 def add_product(body: ProductInput):
     """Add a new product"""
     if not body.name:
@@ -177,6 +184,7 @@ def add_product(body: ProductInput):
     return jsonify({'message': 'Product added successfully!'}), 202
 
 @api.put('/products/<int:product_id>/update', tags=[product_tag], summary="Update an existing product's description, price, and quantity in the 'products' database, through 'Request Body'.",
+    security=[{"bearerAuth": []}],
     description="Update a product's description, price, and/or quantity using the specified product ID. All three elements are optional.",
     responses={
         203: {
@@ -259,6 +267,7 @@ def add_product(body: ProductInput):
         }
     }
 )
+@requires_auth
 def update_product(path: ProductIdPath, body: ProductUpdate):
     """Update a product"""
     product = db.session.get(Product, path.product_id)
@@ -284,6 +293,7 @@ def update_product(path: ProductIdPath, body: ProductUpdate):
     return jsonify({'message': 'Product updated successfully.'}), 203
 
 @api.delete('/products/<int:product_id>/delete', tags=[product_tag], summary="Delete a product",
+    security=[{"bearerAuth": []}],
     description="Delete a product from the 'products' database using the specified product ID.",    
     responses={
         200: {
@@ -346,6 +356,7 @@ def update_product(path: ProductIdPath, body: ProductUpdate):
         }
     }
 )
+@requires_auth
 def delete_product(path: ProductIdPath):
     """Delete a product"""
     product = db.session.get(Product, path.product_id)
@@ -354,3 +365,33 @@ def delete_product(path: ProductIdPath):
         db.session.commit()
         return jsonify({'message': 'Product deleted successfully.'}), 200
     return jsonify({'message': 'Product not found'}), 404
+
+@api.get('/login')
+def login():
+    return oauth.auth0.authorize_redirect(
+        redirect_uri=url_for("api.callback", _external=True)
+    )
+
+@api.get('/callback')
+def callback():
+    token = oauth.auth0.authorize_access_token()
+    session["user"] = token
+    return redirect("/")
+
+@api.get('/logout')
+def logout():
+    session.clear()
+    params = {
+        # 'returnTo': url_for('index', _external=True),
+        'returnTo': request.url_root,
+        'client_id': current_app.config['CLIENT_ID']
+    }
+    auth0_domain = current_app.config['AUTH0_DOMAIN']
+    return redirect(f'https://{auth0_domain}/v2/logout?{urlencode(params)}')
+
+@api.get('/session')
+def get_session():
+    return jsonify({
+        'authenticated': 'user' in session,
+        'user': session.get('user', None)
+    })

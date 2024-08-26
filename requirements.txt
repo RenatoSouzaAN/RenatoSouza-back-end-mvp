@@ -5,3 +5,7 @@ Flask-SQLAlchemy
 Flask-Migrate
 flask-openapi3
 werkzeug
+authlib
+auth0-python
+requests
+python-jose
