@@ -1,14 +1,33 @@
+"""
+__init__.py
+
+This module sets up the Flask application, including configuration, database initialization,
+authentication, and route registration.
+
+It includes the following:
+- Flask application factory (`create_app`) that configures the app.
+- Logging configuration to output logs to stdout.
+- Registration of database, migrations, CORS, and OAuth components.
+- Error handlers for authentication errors and unhandled exceptions.
+- A route to redirect the root URL to the API documentation.
+
+Functions:
+- create_app: Creates and configures the Flask application.
+"""
+
 import logging
 import sys
+import traceback
 
 from flask import redirect, jsonify
 from flask_openapi3 import OpenAPI
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
+from cli import create_admin
+
 from .extensions import db, migrate, oauth, info
 from .auth import AuthError
-from cli import create_admin
-from werkzeug.exceptions import HTTPException
-import traceback
+from .routes import api
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -20,8 +39,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def create_app():
+    """ Create and configure an instance of the Flask application. """
     app = OpenAPI(__name__, info=info)
-    
     app.config.from_object('config.Config')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../database/dmarket.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -44,10 +63,13 @@ def create_app():
         server_metadata_url=f'https://{app.config["AUTH0_DOMAIN"]}/.well-known/openid-configuration'
     )
 
-    security_scheme = {"bearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT", "in": "header"}}
+    security_scheme = {"bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "in": "header"}
+        }
     app.security_schemes = security_scheme
-
-    from .routes import api
     app.register_api(api)
 
     @app.errorhandler(AuthError)
@@ -56,14 +78,14 @@ def create_app():
         response = jsonify(ex.error)
         response.status_code = ex.status_code
         return response
-    
+
     @app.errorhandler(Exception)
     def handle_exception(e):
         """ Handles all unhandled exceptions. """
         if isinstance(e, HTTPException):
             return e
-        
-        logger.error(f"An unhandled exception occurred: {str(e)}")
+
+        logger.error("An unhandled exception occurred: %s", str(e))
         logger.error(traceback.format_exc())
         return jsonify({"error": "An unexpected error occurred"}), 500
 
