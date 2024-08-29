@@ -1,5 +1,5 @@
 import json
-from flask import request, g, jsonify, abort
+from flask import request, g, abort, session
 from functools import wraps
 from jose import jwt
 from jose.exceptions import JWTError
@@ -28,7 +28,10 @@ def get_token_auth_header():
     logger.debug("Request headers: %s", request.headers)
     auth = request.headers.get("Authorization", None)
     if not auth:
-        logger.error("No Authorization header present")
+        logger.debug("No Authorization header present, checking session")
+        if 'user' in session and 'access_token' in session['user']:
+            return session['user']['access_token']
+        logger.error("No Authorization header or session token present")
         raise AuthError({"code": "authorization_header_missing",
                          "description": "Authorization header is expected"}, 401)
     
@@ -62,7 +65,6 @@ def get_or_create_user(payload):
         email = payload.get('email', '')
         name = payload.get('name') or None
         user = User(id=user_id, email=email, name=name)
-        # user = User(id=user_id, email=email)
         try:
             db.session.add(user)
             db.session.commit()
@@ -76,13 +78,14 @@ def get_or_create_user(payload):
     return user
 
 def requires_auth(f):
+    """Determines if the Access Token is valid"""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = get_token_auth_header()
         try:
-            # First, try to verify as a regular JWT
             payload = verify_jwt(token)
         except Exception as e:
+            logger.error(f"Error verifying JWT: {str(e)}")
             raise AuthError({"code": "invalid_token",
                                  "description": str(e)}, 401)              
         
@@ -91,6 +94,7 @@ def requires_auth(f):
     return decorated
 
 def verify_jwt(token):
+    """Verifies the JWT token"""
     jsonurl = urlopen(f"https://{AUTH0_DOMAIN}/.well-known/jwks.json")
     jwks = json.loads(jsonurl.read())
     unverified_header = jwt.get_unverified_header(token)
@@ -121,13 +125,20 @@ def verify_jwt(token):
                      "description": "Unable to find appropriate key"}, 401)
 
 def requires_admin(f):
+    """Determines if the user is an admin"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        user_id = g.current_user['sub']
-        user = User.query.get(user_id)
+        if not hasattr(g, 'current_user'):
+            logger.error("No current user set in context")
+            abort(401)
+        
+        user = g.current_user
+        logger.debug(f"Checking admin status for user: {user}")
         
         if user and user.is_admin:
+            logger.info(f"Admin access granted for user: {user.id}")
             return f(*args, **kwargs)
         
+        logger.warning(f"Admin access denied for user: {user.id}")
         abort(403)
     return decorated
