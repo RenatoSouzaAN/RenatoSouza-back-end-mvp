@@ -1,20 +1,15 @@
 from flask import jsonify, redirect, request, url_for, session, current_app, g, abort
-from jose import jwt
-from jose.exceptions import JWTError
-from urllib.parse import urlencode
-from . import oauth
-from .auth import requires_auth, requires_admin, AuthError, get_token_auth_header, get_or_create_user, verify_jwt
-from config import Config
 from flask_openapi3 import APIBlueprint, Tag
 from pydantic import BaseModel
+from urllib.parse import urlencode
 
 from .models import Product, User
-from .schemas import ProductInput, GetProduct, ProductUpdate, MessageResponse, AdminSetBody
-from . import db
+from .schemas import ProductInput, GetProduct, ProductUpdate, ProductIdPath, AdminSetBody
+from .extensions import db, oauth
+from .auth import requires_auth, requires_admin,  get_or_create_user
+from config import Config
+
 import logging
-import traceback
-import base64
-import json
 
 api = APIBlueprint('api', __name__)
 
@@ -22,8 +17,6 @@ product_tag = Tag(name='product', description='Product operations')
 admin_tag = Tag(name='admin', description='Admin operations')
 
 logger = logging.getLogger(__name__)
-class ProductIdPath(BaseModel):
-    product_id: int
 
 @api.get('/products', tags=[product_tag], summary="List all products in the 'products' database.", 
     description="Retrieve a list of all products in the database. Returns a message if no products are available.",
@@ -382,18 +375,18 @@ def delete_product(path: ProductIdPath):
     db.session.commit()
     return jsonify({'message': 'Product deleted successfully.'}), 200
 
-#@api.post('/admin/set', tags=[admin_tag])
-@api.post('/admin/set', tags=[admin_tag])
+@api.post('/admin/set', tags=[admin_tag], summary="Set a user as admin", 
+    security=[{"bearerAuth": []}],
+    description="Set a user as an admin. Only current admins can set new ones.",
+    responses={
+        200: {"description": "User set as admin successfully"},
+        403: {"description": "Only existing admins can set new admins"},
+        404: {"description": "User not found"},
+    })
 @requires_auth
-# @requires_admin
+@requires_admin
 def set_admin(body: AdminSetBody):
-    # Check if there are any existing admins
-    existing_admin = User.query.filter_by(is_admin=True).first()
-    
-    # If there are existing admins, only allow current admins to set new admins
-    if existing_admin and not g.current_user.is_admin:
-        return jsonify({'message': 'Only existing admins can set new admins'}), 403
-    
+    """Set a user as admin"""    
     user = User.query.filter_by(email=body.email).first()
     if not user:
         return jsonify({'message': 'User not found'}), 404
@@ -402,31 +395,34 @@ def set_admin(body: AdminSetBody):
     db.session.commit()
     return jsonify({'message': 'User set as admin successfully'}), 200
 
-@api.get('/admin/check')
+@api.get('/admin/check', security=[{"bearerAuth": []}])
 @requires_auth
 def check_admin():
     return jsonify({'is_admin': g.current_user.is_admin}), 200
 
-@api.get('/login')
+@api.get('/login', summary="Initiate login process",
+    description="Redirects the user to the Auth0 login page."
+)
 def login():
+    """ Initiate login process """
     return oauth.auth0.authorize_redirect(
         redirect_uri=url_for("api.callback", _external=True),
-        # audience=f'https://{Config.AUTH0_DOMAIN}/userinfo',
         audience=Config.API_AUDIENCE,
         scope="openid profile email"
     )
 
-@api.get('/callback')
+@api.get('/callback', summary="Auth0 callback",
+    description="Handles the callback from Auth0 after user authentication."
+)
 def callback():
+    """ Handles the callback from Auth0 after user authentication. """
     try:
         token = oauth.auth0.authorize_access_token()
         
-        # Get user info from Auth0
         userinfo_endpoint = f"https://{Config.AUTH0_DOMAIN}/userinfo"
         resp = oauth.auth0.get(userinfo_endpoint)
         userinfo = resp.json()
 
-        # Save or update user in database
         user = get_or_create_user(userinfo)
 
         session['user'] = {
@@ -435,171 +431,69 @@ def callback():
             'name': user.name,
             'access_token': token['access_token']
         }
-
-        logger.info(f"User logged in and saved to database: {user}")
         return redirect("/")
     except Exception as e:
         logger.error(f"Error in callback: {str(e)}")
-        logger.error(traceback.format_exc())
         return jsonify({"error": "An error ocurred during login"}), 500
 
-@api.get('/logout')
+@api.get('/logout', summary="Logout user",
+    description="Clears the user session and redirects to Auth0 logout."
+)
 def logout():
+    """ Logout user """
     session.clear()
     params = {
-        # 'returnTo': url_for('index', _external=True),
         'returnTo': request.url_root,
         'client_id': current_app.config['CLIENT_ID']
     }
     auth0_domain = current_app.config['AUTH0_DOMAIN']
     return redirect(f'https://{auth0_domain}/v2/logout?{urlencode(params)}')
 
-@api.get('/session')
+@api.get('/session', tags=[admin_tag], summary="Get current session info",
+    security=[{"bearerAuth": []}],
+    description="Retrieves information about the current user session.",
+    responses={
+        200: {"description": "Returns session information for authenticated user"},
+        401: {"description": "User not authenticated"},
+    }
+)
+@requires_auth
+@requires_admin
 def get_session():
+    """ Get current session info """
     user = session.get('user', None)
     if user:
         return jsonify({
             'authenticated': True,
             'user': user,
-            'access_token': user.get('access_token')  # Include access token in the response
+            'access_token': user.get('access_token')  
         }), 200
     return jsonify({
         'authenticated': False,
         'user': None
     }), 401
-
-@api.route('/test_user_creation')
-def test_user_creation():
-    try:
-        user = User(id='test1234', email='test2@test.com', name='')
-        db.session.add(user)
-        db.session.commit()
-        return jsonify({"message": "User created successfully"}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
     
-@api.route('/test_product_creation')
-def test_product_creation():
-    try:
-        product = Product(name='test product', description="", price=10, quantity=5, user_id='testuserid')
-        db.session.add(product)
-        db.session.commit()
-        return jsonify({"message": "Product created successfully"}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
-    
-@api.route('/test_db')
-def test_db():
-    try:
-        db.session.execute('SELECT 1')
-        return jsonify({"message": "Database connection successful"}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-@api.get('/inspect_token', security=[{"bearerAuth": []}])
+@api.get('/admin/users', tags=[admin_tag], summary="Get all users info",
+    security=[{"bearerAuth": []}],
+    description="Retrieves information about all users. Admin access required.",
+    responses={
+        200: {"description": "Returns information for all users"},
+        401: {"description": "User not authenticated"},
+        403: {"description": "User not authorized (not an admin)"},
+    }
+)
 @requires_auth
-def inspect_token():
-    try:
-        user = g.get('current_user')
-        if user is None:
-            logger.error("current user not found in g")
-            return jsonify({"error": "User not found"}), 404
-
-        user_dict = user.to_dict() if hasattr(user, 'to_dict') else str(user)
-        token_payload = g.get('token_payload', {})
-
-        return jsonify({
-            "message": "Token inspection successful",
-            "user": user_dict,
-            "token_payload": token_payload
-        }), 200
-    except Exception as e:
-        logger.error(f"Error in inspect_token: {str(e)}")
-        logger.error(traceback.format_exc())
-        return jsonify({"error": "An error occurred while processing the request"}), 500
-
-@api.get('/test_auth_header', security=[{"bearerAuth": []}])
-def test_auth_header():
-    auth_header = request.headers.get('Authorization')
-    if auth_header:
-        return jsonify({"message": "Authorization header found", "header": auth_header}), 200
-    else:
-        return jsonify({"message": "No Authorization header found"}), 401
+@requires_admin
+def get_all_users_info():
+    users = User.query.all()
+    users_info = [{
+        'user_id': user.id,
+        'email': user.email,
+        'name': user.name,
+        'is_admin': user.is_admin,
+        'access_token': session.get('user', {}).get('access_token') if user.id == g.current_user.id else None
+    } for user in users]
     
-@api.get('/test_token', security=[{"bearerAuth": []}])
-@requires_auth
-def test_token():
-    try:
-        token = get_token_auth_header()
-        logger.debug(f"Token received in test_token: {token[:10]}...")
-
-        # Attempt to decode the token
-        try:
-            # Decode and verify the JWT
-            # unverified_claims = jwt.get_unverified_claims(token)
-            payload = verify_jwt(token)
-            return jsonify({"message": "Token decoded successfully", "claims": payload}), 200
-        except JWTError as e:
-            logger.error(f"JWTError in test_token: {str(e)}")
-            return jsonify({"error": "Invalid JWT token"}), 401
-        
-    except AuthError as ae:
-        logger.error(f"AuthError in test_token: {ae.error}")
-        return jsonify(ae.error), ae.status_code
-    except Exception as e:
-        logger.error(f"Unexpected error in test_token: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-    
-    
-@api.get('/user')
-def get_user():
-    if 'user' in session:
-        return jsonify(session['user']), 200
-    return jsonify({"message": "User not logged in"}), 401
-
-@api.get('/echo_token')
-@requires_auth
-def echo_token():
-    auth_header = request.headers.get('Authorization', '')
-    parts = auth_header.split()
-    if len(parts) == 2 and parts[0].lower() == 'bearer':
-        token = parts[1]
-        return jsonify({
-            "received_token": token,
-            "token_length": len(token),
-            "token_type": str(type(token))
-        }), 200
-    else:
-        return jsonify({"error": "Invalid Authorization header"}), 400
-    
-@api.get('/inspect_token2')
-def inspect_token2():
-    try:
-        token = get_token_auth_header()
-
-        # Decode the token header
-        header_segment = token.split('.')[0]
-        padded = header_segment + '=' * (4 - len(header_segment) % 4)
-        header = json.loads(base64.b64decode(padded).decode('utf-8'))
-
-        if header.get('enc') == 'A256GCM':
-            # This is a JWE token
-            return jsonify({"message": "Ecrypted token detected", 
-                            "header": header,
-                            "note": "This is a JWE (JSON Web Encryption) token. Decryption requires the appropriate key."
-                            }), 200
-
-        else:
-            # Attempt to decode as a regular JWT
-            decoded = jwt.decode(token, verify=False)
-            return jsonify({
-                "message": "Token inspection",
-                "header": header,
-                "payload": decoded
-            }), 200
-    except AuthError as e:
-        return jsonify(e.error), e.status_code
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
+    return jsonify({
+        'users': users_info
+    }), 200

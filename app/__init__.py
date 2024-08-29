@@ -1,23 +1,14 @@
 import logging
 import sys
 
-from flask import Flask, redirect, jsonify
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_migrate import Migrate
-# from flask_openapi3 import OpenAPI, Info
+from flask import redirect, jsonify
 from flask_openapi3 import OpenAPI
 from flask_cors import CORS
 from .extensions import db, migrate, oauth, info
-# from authlib.integrations.flask_client import OAuth
 from .auth import AuthError
 from cli import create_admin
 from werkzeug.exceptions import HTTPException
 import traceback
-
-# db = SQLAlchemy()
-# oauth = OAuth()
-# info = Info(title="DMarket API", version="2.0.0")
-
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -37,7 +28,6 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
-    # CORS(app)
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     oauth.init_app(app)
 
@@ -54,7 +44,6 @@ def create_app():
         server_metadata_url=f'https://{app.config["AUTH0_DOMAIN"]}/.well-known/openid-configuration'
     )
 
-    # Define security scheme
     security_scheme = {"bearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT", "in": "header"}}
     app.security_schemes = security_scheme
 
@@ -63,12 +52,14 @@ def create_app():
 
     @app.errorhandler(AuthError)
     def handle_auth_error(ex):
+        """ Handles authentication errors. """
         response = jsonify(ex.error)
         response.status_code = ex.status_code
         return response
     
     @app.errorhandler(Exception)
     def handle_exception(e):
+        """ Handles all unhandled exceptions. """
         if isinstance(e, HTTPException):
             return e
         
