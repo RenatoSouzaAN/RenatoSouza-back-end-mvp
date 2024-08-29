@@ -1,6 +1,6 @@
 # Back-End (API)
 
-This API is a Flask-based RESTful API for managing products in a market database. It is made to fullfill the requirements in the 'Assessment Requirements and Composition', in which includes, to perform some CRUD operations (Create, Read, Update, and Delete) on products stored in an SQLite database, with its data documented in Swagger, whilst being a SPA (Single Page Application). -- The front-end has it own repository, the link for is below --
+This API is a Flask-based RESTful API for managing products in a market database. It includes user authentication, admin functionality, and CRUD operations for products. The API is documented using OpenAPI 3 and is designed to work with a separate front-end application. -- The front-end has it own repository, the link for is below --
 
 Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 
@@ -11,22 +11,31 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
     -   [Explanation](#explanation)
+-   [Configuration](#configuration)
 -   [Running the Server](#running-the-server)
 -   [API Documentation](#api-documentation)
 -   [API Endpoints](#api-endpoints)
     -   [Get all products](#get-all-products)
     -   [Add a product](#add-a-product)
+    -   [Update a product](#update-a-product)
     -   [Delete a product](#delete-a-product)
+    -   [Set user as an admin](#set-user-as-an-admin)
+    -   [Login into an account](#login-into-an-account)
+    -   [Logout from account](#logout-from-account)
+    -   [Get all users](#get-all-users)
 -   [Responses](#responses)
+-   [Authentication](#authentication)
 -   [Technology Stack](#technology-stack)
 -   [Contributors](#contributors)
 -   [License](#license)
 
 ## Features
 
--   List all products
--   Add a new product
--   Delete a product
+-   User authentication with Auth0
+-   Admin user management
+-   CRUD operations for products
+-   User-specific product management
+-   OpenAPI 3 documentation
 
 ## Setup
 
@@ -34,6 +43,7 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 
 -   Python 3.x installed
 -   Pip package manager
+-   Auth0 account and application setup
 
 ### Installation
 
@@ -89,6 +99,16 @@ These commands (`flask db init`, `flask db migrate`, `flask db upgrade`) are use
 
 These steps are crucial whenever you make changes to your database models (`models.py` in this case) to ensure that your database schema stays up-to-date with your application's data model.
 
+### Configuration
+
+1. Create a `.env` file in the root directory with the following content:
+   ```
+   AUTH0_DOMAIN=your_auth0_domain
+   API_AUDIENCE=your_api_audience
+   CLIENT_ID=your_client_id
+   CLIENT_SECRET=your_client_secret
+   ```
+
 ### Running the Server
 
 To start the Flask server:
@@ -109,7 +129,7 @@ The API will be accessible at `http://localhost:5000`.
 
 OpenAPI 3 is integrated for API documentation. After starting the server, visit http://localhost:5000/openapi to explore the API endpoints and interact with them.
 
-## API Endpoints
+## Key API Endpoints
 
 ### Get all products
 
@@ -119,22 +139,42 @@ OpenAPI 3 is integrated for API documentation. After starting the server, visit 
 ### Add a product
 
 -   **POST** `/api/products/create`
-    -   Adds a new product to the database. Requires JSON payload with `name`, `price`, and `quantity`.
+    -   Adds a new product to the database. Requires JSON payload with `name`, `price`, and `quantity`. (authenticated)
 
 ### Update a product
 
--   **POST** `/api/products/<product_id>/update`
-    -   Upgrades the product with the specified `product_id` from the database. Requires a JSON payload with any of the following fields: description, price, or quantity.
+-   **PUT** `/api/products/<product_id>/update`
+    -   Upgrades the product with the specified `product_id` from the database. Requires a JSON payload with any of the following fields: description, price, or quantity. (authenticated)
 
 ### Delete a product
 
 -   **DELETE** `/api/products/<product_id>/delete`
-    -   Deletes the product with the specified `product_id` from the database.
+    -   Deletes the product with the specified `product_id` from the database. (authenticated)
+
+### Set user as an admin
+-   **POST** `/admin/set`
+    -   Changes the privileges of a user by setting it as an admin (authenticaded) (admin only)
+
+### Login into an account
+-   **GET** `/login`
+    -   Initiate login process by requesting authentication through Auth0 API
+
+### Logout from account
+-   **GET** `/logout`
+    -   Logs out the current logged user by requesting Auth0 API
+
+### Get all users
+-   **GET** `/admin/users`
+    -   Returns a list of all user in the database. (authenticaded) (admin only)
 
 ## Responses
 
 -   Successful responses include appropriate HTTP status codes and JSON payloads.
 -   Error responses provide meaningful error messages and status codes.
+
+## Authentication
+
+This API uses Auth0 for authentication. Users need to authenticate through the `/login` endpoint, which will redirect to Auth0 for login. After successful authentication, users receive a JWT token which should be included in the `Authorization` header for authenticated requests.
 
 ## Technology Stack
 
@@ -143,6 +183,8 @@ OpenAPI 3 is integrated for API documentation. After starting the server, visit 
 -   **Flask-Migrate**: Database migrations for Flask applications
 -   **Flask-CORS**: CORS support for Flask
 -   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation
+-   **Authlib**: OAuth and OpenID Connect library for Python.
+-   **SQLite**: Lightweight, serverless database engine.
 
 ## Contributors
 
