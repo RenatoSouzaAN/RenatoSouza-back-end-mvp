@@ -133,22 +133,22 @@ OpenAPI 3 is integrated for API documentation. After starting the server, visit 
 
 ### Get all products
 
--   **GET** `/api/products`
+-   **GET** `/products`
     -   Returns a list of all products in the database.
 
 ### Add a product
 
--   **POST** `/api/products/create`
+-   **POST** `/products/create`
     -   Adds a new product to the database. Requires JSON payload with `name`, `price`, and `quantity`. (authenticated)
 
 ### Update a product
 
--   **PUT** `/api/products/<product_id>/update`
+-   **PUT** `/products/<product_id>/update`
     -   Upgrades the product with the specified `product_id` from the database. Requires a JSON payload with any of the following fields: description, price, or quantity. (authenticated)
 
 ### Delete a product
 
--   **DELETE** `/api/products/<product_id>/delete`
+-   **DELETE** `/products/<product_id>/delete`
     -   Deletes the product with the specified `product_id` from the database. (authenticated)
 
 ### Set user as an admin
