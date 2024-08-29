@@ -23,3 +23,6 @@ class ProductIdPath(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str = Field(..., description="Message response")
+
+class AdminSetBody(BaseModel):
+    email: str = Field(..., description="Email of the user to be set as admin")
