@@ -1,15 +1,33 @@
+"""
+auth.py
+
+This module handles the authentication and authorization mechanisms for the application.
+
+It includes the following:
+- Authentication of users using JWT tokens.
+- Authorization checks for different user roles.
+- Error handling related to authentication failures.
+
+Functions:
+- verify_token: Validates the JWT token.
+- requires_auth: Decorator to protect routes with authentication.
+
+Classes:
+- AuthError: Custom exception class for authentication errors.
+"""
+
 import json
-from flask import request, g, abort, session
+import logging
+
 from functools import wraps
+from urllib.request import urlopen
+from flask import request, g, abort, session
 from jose import jwt
 from jose.exceptions import JWTError
-from urllib.request import urlopen
 
 from config import Config
 from .models import User
 from .extensions import db
-
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -19,6 +37,7 @@ ALGORITHMS = ["RS256"]
 API_AUDIENCE = Config.API_AUDIENCE
 
 class AuthError(Exception):
+    """Exception raised for errors in the authentication process."""
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
@@ -34,47 +53,47 @@ def get_token_auth_header():
         logger.error("No Authorization header or session token present")
         raise AuthError({"code": "authorization_header_missing",
                          "description": "Authorization header is expected"}, 401)
-    
+
     parts = auth.split()
-    logger.debug(f"Authorization header parts: {parts}")
+    logger.debug("Authorization header parts: %s", parts)
 
     if parts[0].lower() != "bearer":
         logger.error("Authorization header must start with Bearer")
         raise AuthError({"code": "invalid_header",
                          "description": "Authorization header must start with Bearer"}, 401)
-    elif len(parts) == 1:
+    if len(parts) == 1:
         logger.error("Token not found")
         raise AuthError({"code": "invalid_header",
                          "description": "Token not found"}, 401)
-    elif len(parts) > 2:
+    if len(parts) > 2:
         logger.error("Authorization header must be Bearer token")
         raise AuthError({"code": "invalid_header",
                          "description": "Authorization header must be Bearer token"}, 401)
-    
+
     token = parts[1]
 
     return token
 
 def get_or_create_user(payload):
     """Check if a user exists and creates it in case not"""
-    logger.debug(f"Attempting to get or create user with payload: {payload}")
+    logger.debug("Attempting to get or create user with payload: %s", payload)
     user_id = payload['sub']
     user = User.query.get(user_id)
     if not user:
-        logger.info(f"User {user_id} not found. Creating new user.")
+        logger.info("User %s not found. Creating new user.", user_id)
         email = payload.get('email', '')
         name = payload.get('name') or None
-        user = User(id=user_id, email=email, name=name)
+        user = User(user_id=user_id, email=email, name=name)
         try:
             db.session.add(user)
             db.session.commit()
-            logger.info(f"User {user_id} created successfully.")
-        except Exception as e:
+            logger.info("User %s created successfully.", user_id)
+        except Exception:
             db.session.rollback()
-            logger.error(f"Error creating user: {str(e)}")
+            logger.error("Error creating user: %s", user_id)
             raise
     else:
-        logger.info(f"User {user_id} already exists.")
+        logger.info("User %s already exists.", user_id)
     return user
 
 def requires_auth(f):
@@ -85,20 +104,23 @@ def requires_auth(f):
         try:
             payload = verify_jwt(token)
         except Exception as e:
-            logger.error(f"Error verifying JWT: {str(e)}")
+            logger.error("Error verifying JWT: %s", str(e))
             raise AuthError({"code": "invalid_token",
-                                 "description": str(e)}, 401)              
-        
+                                 "description": str(e)}, 401) from e
+
         g.current_user = get_or_create_user(payload)
         return f(*args, **kwargs)
     return decorated
 
 def verify_jwt(token):
     """Verifies the JWT token"""
-    jsonurl = urlopen(f"https://{AUTH0_DOMAIN}/.well-known/jwks.json")
-    jwks = json.loads(jsonurl.read())
+    jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+    with urlopen(jwks_url) as response:
+        jwks = json.loads(response.read())
+
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = {}
+
     for key in jwks["keys"]:
         if key["kid"] == unverified_header["kid"]:
             rsa_key = {
@@ -108,6 +130,7 @@ def verify_jwt(token):
                 "n": key["n"],
                 "e": key["e"]
             }
+
     if rsa_key:
         try:
             payload = jwt.decode(
@@ -120,7 +143,7 @@ def verify_jwt(token):
             return payload
         except JWTError as e:
             raise AuthError({"code": "invalid_token",
-                             "description": str(e)}, 401)
+                             "description": str(e)}, 401) from e
     raise AuthError({"code": "invalid_header",
                      "description": "Unable to find appropriate key"}, 401)
 
@@ -131,14 +154,14 @@ def requires_admin(f):
         if not hasattr(g, 'current_user'):
             logger.error("No current user set in context")
             abort(401)
-        
+
         user = g.current_user
-        logger.debug(f"Checking admin status for user: {user}")
-        
+        logger.debug("Checking admin status for user: %s", user.id)
+
         if user and user.is_admin:
-            logger.info(f"Admin access granted for user: {user.id}")
+            logger.info("Admin access granted for user: %s", user.id)
             return f(*args, **kwargs)
-        
-        logger.warning(f"Admin access denied for user: {user.id}")
+
+        logger.warning("Admin access denied for user: %s", user.id)
         abort(403)
     return decorated

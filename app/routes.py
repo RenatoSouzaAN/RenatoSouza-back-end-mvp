@@ -1,15 +1,33 @@
-from flask import jsonify, redirect, request, url_for, session, current_app, g, abort
-from flask_openapi3 import APIBlueprint, Tag
-from pydantic import BaseModel
+"""
+routes.py
+
+This module defines the API routes for the application.
+
+It includes routes for:
+- User management
+- Product handling
+- Order processing
+
+Functions:
+- create_user: Handles user creation.
+- get_product: Fetches details of a specific product.
+- process_order: Processes user orders.
+"""
+
 from urllib.parse import urlencode
 
-from .models import Product, User
-from .schemas import ProductInput, GetProduct, ProductUpdate, ProductIdPath, AdminSetBody
-from .extensions import db, oauth
-from .auth import requires_auth, requires_admin,  get_or_create_user
+import json
+import logging
+import requests
+
+from flask import jsonify, redirect, request, url_for, session, current_app, g, abort
+from flask_openapi3 import APIBlueprint, Tag
 from config import Config
 
-import logging
+from .models import Product, User
+from .schemas import ProductInput, ProductUpdate, ProductIdPath, AdminSetBody
+from .extensions import db, oauth
+from .auth import requires_auth, requires_admin,  get_or_create_user
 
 api = APIBlueprint('api', __name__)
 
@@ -18,8 +36,10 @@ admin_tag = Tag(name='admin', description='Admin operations')
 
 logger = logging.getLogger(__name__)
 
-@api.get('/products', tags=[product_tag], summary="List all products in the 'products' database.", 
-    description="Retrieve a list of all products in the database. Returns a message if no products are available.",
+@api.get('/products', tags=[product_tag],
+    summary="List all products in the 'products' database.",
+    description="Retrieve a list of all products in the database. "
+                "Returns a message if no products are available.",     
     responses={
         200: {
             "description": "Returns a list of Products available in the 'products' database.",
@@ -54,7 +74,8 @@ logger = logging.getLogger(__name__)
             }
         },
         201: {
-            "description": "Returns a message if there are no Products available in the 'products' database.", 
+            "description": "Returns a message if there are no Products "
+                           "available in the 'products' database.",
             "content": {
                 "application/json": {
                     "examples": {
@@ -75,23 +96,16 @@ def get_products():
     products = Product.query.all()
     if not products:
         return jsonify({'message': 'The Products database is empty'}), 201
-    
-    products_list = [
-        GetProduct(
-            id=product.id,
-            name=product.name,
-            description=product.description,
-            price=product.price,
-            quantity=product.quantity
-        ).model_dump()
-        for product in products
-    ]
+
+    products_list = [product.to_dict() for product in products]
     return jsonify(products_list), 200
 
 
-@api.post('/products/create', tags=[product_tag], summary="Add a new product to the 'products' database, through 'Request Body'.",
+@api.post('/products/create', tags=[product_tag],
+    summary="Add a new product to the 'products' database, through 'Request Body'.",
     security=[{"bearerAuth": []}],
-    description="Add a new product to the database by providing the required fields (name, price, and quantity).", 
+    description="Add a new product to the database by providing the "
+                "required fields (name, price, and quantity).",
     responses={
         202: {"description": "Product added successfully to the 'products' database."},
         400: {
@@ -167,13 +181,13 @@ def add_product(body: ProductInput):
     """Add a new product"""
     if not body.name:
         return jsonify({'message': 'Name is required'}), 400
-    
+
     if body.price < 1:
         return jsonify({'message': 'Price must be higher than 0.'}), 400
-    
+
     if body.quantity < 1:
         return jsonify({'message': 'Quantity must be higher than 0.'}), 400
-   
+
     new_product = Product(
         name=body.name,
         description=body.description,
@@ -185,9 +199,12 @@ def add_product(body: ProductInput):
     db.session.commit()
     return jsonify({'message': 'Product added successfully!'}), 202
 
-@api.put('/products/<int:product_id>/update', tags=[product_tag], summary="Update an existing product's description, price, and quantity in the 'products' database, through 'Request Body'.",
+@api.put('/products/<int:product_id>/update', tags=[product_tag],
+    summary="Update an existing product's description, price, "
+            "and quantity in the 'products' database, through 'Request Body'.",
     security=[{"bearerAuth": []}],
-    description="Update a product's description, price, and/or quantity using the specified product ID. All three elements are optional.",
+    description="Update a product's description, price, and/or quantity using "
+                "the specified product ID. All three elements are optional.",
     responses={
         203: {
             "description": "Product updated successfully in the 'products' database.", 
@@ -275,7 +292,7 @@ def update_product(path: ProductIdPath, body: ProductUpdate):
     product = db.session.get(Product, path.product_id)
     if not product:
         return jsonify({'message': 'Product not found.'}), 404
-   
+
     if product.user_id != g.current_user.id and not g.current_user.is_admin:
         abort(403, description="You don't have permission to edit this product.")
 
@@ -285,21 +302,22 @@ def update_product(path: ProductIdPath, body: ProductUpdate):
     if body.price is not None:
         if body.price < 1:
             return jsonify({'message': 'Price must be higher than 0.'}), 400
-        
+
         product.price = body.price
 
     if body.quantity is not None:
         if body.quantity < 1:
             return jsonify({'message': 'Quantity must be higher than 0.'}), 400
-        
+
         product.quantity = body.quantity
-       
+
     db.session.commit()
     return jsonify({'message': 'Product updated successfully.'}), 203
 
-@api.delete('/products/<int:product_id>/delete', tags=[product_tag], summary="Delete a product",
+@api.delete('/products/<int:product_id>/delete', tags=[product_tag],
+    summary="Delete a product",
     security=[{"bearerAuth": []}],
-    description="Delete a product from the 'products' database using the specified product ID.",    
+    description="Delete a product from the 'products' database using the specified product ID.",
     responses={
         200: {
             "description": "Product deleted successfully from the 'products' database.", 
@@ -316,7 +334,7 @@ def update_product(path: ProductIdPath, body: ProductUpdate):
                 }
             }
         },
-        400: {"description": "Invalid input", 
+        400: {"description": "Invalid input",
             "content": {
                 "application/json": {
                     "examples": {
@@ -330,7 +348,7 @@ def update_product(path: ProductIdPath, body: ProductUpdate):
                 }
             }
         },
-        404: {"description": "Product not found", 
+        404: {"description": "Product not found",
             "content": {
                 "application/json": {
                     "examples": {
@@ -367,7 +385,7 @@ def delete_product(path: ProductIdPath):
     product = db.session.get(Product, path.product_id)
     if not  product:
         return jsonify({'message': 'Product not found'}), 404
-    
+
     if product.user_id != g.current_user.id and not g.current_user.is_admin:
         abort(403, description="You don't have permission to delete this product.")
 
@@ -375,7 +393,8 @@ def delete_product(path: ProductIdPath):
     db.session.commit()
     return jsonify({'message': 'Product deleted successfully.'}), 200
 
-@api.post('/admin/set', tags=[admin_tag], summary="Set a user as admin", 
+@api.post('/admin/set', tags=[admin_tag],
+    summary="Set a user as admin",
     security=[{"bearerAuth": []}],
     description="Set a user as an admin. Only current admins can set new ones.",
     responses={
@@ -386,11 +405,11 @@ def delete_product(path: ProductIdPath):
 @requires_auth
 @requires_admin
 def set_admin(body: AdminSetBody):
-    """Set a user as admin"""    
+    """Set a user as admin"""
     user = User.query.filter_by(email=body.email).first()
     if not user:
         return jsonify({'message': 'User not found'}), 404
-    
+
     user.is_admin = True
     db.session.commit()
     return jsonify({'message': 'User set as admin successfully'}), 200
@@ -398,9 +417,11 @@ def set_admin(body: AdminSetBody):
 @api.get('/admin/check', security=[{"bearerAuth": []}])
 @requires_auth
 def check_admin():
+    """Check if user is an admin"""
     return jsonify({'is_admin': g.current_user.is_admin}), 200
 
-@api.get('/login', summary="Initiate login process",
+@api.get('/login',
+    summary="Initiate login process",
     description="Redirects the user to the Auth0 login page."
 )
 def login():
@@ -411,16 +432,18 @@ def login():
         scope="openid profile email"
     )
 
-@api.get('/callback', summary="Auth0 callback",
+@api.get('/callback',
+    summary="Auth0 callback",
     description="Handles the callback from Auth0 after user authentication."
 )
 def callback():
     """ Handles the callback from Auth0 after user authentication. """
     try:
         token = oauth.auth0.authorize_access_token()
-        
+
         userinfo_endpoint = f"https://{Config.AUTH0_DOMAIN}/userinfo"
         resp = oauth.auth0.get(userinfo_endpoint)
+        resp.raise_for_status()
         userinfo = resp.json()
 
         user = get_or_create_user(userinfo)
@@ -432,11 +455,21 @@ def callback():
             'access_token': token['access_token']
         }
         return redirect("/")
-    except Exception as e:
-        logger.error(f"Error in callback: {str(e)}")
-        return jsonify({"error": "An error ocurred during login"}), 500
+    except oauth.OAuth2Error as e:
+        logger.error("OAuth error in callback: %s", str(e))
+        return jsonify({"error": "OAuth authentication error"}), 500
+    except requests.HTTPError as e:
+        logger.error("HTTP error during user info fetch: %s", str(e))
+        return jsonify({"error": "Failed to fetch user information"}), 500
+    except json.JSONDecodeError as e:
+        logger.error("Error decoding JSON response: %s", str(e))
+        return jsonify({"error": "Failed to decode user information"}), 500
+    except RuntimeError as e:
+        logger.error("Unexpected error in callback: %s", str(e), exc_info=True)
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
-@api.get('/logout', summary="Logout user",
+@api.get('/logout',
+    summary="Logout user",
     description="Clears the user session and redirects to Auth0 logout."
 )
 def logout():
@@ -449,7 +482,8 @@ def logout():
     auth0_domain = current_app.config['AUTH0_DOMAIN']
     return redirect(f'https://{auth0_domain}/v2/logout?{urlencode(params)}')
 
-@api.get('/session', tags=[admin_tag], summary="Get current session info",
+@api.get('/session', tags=[admin_tag],
+    summary="Get current session info",
     security=[{"bearerAuth": []}],
     description="Retrieves information about the current user session.",
     responses={
@@ -466,14 +500,15 @@ def get_session():
         return jsonify({
             'authenticated': True,
             'user': user,
-            'access_token': user.get('access_token')  
+            'access_token': user.get('access_token')
         }), 200
     return jsonify({
         'authenticated': False,
         'user': None
     }), 401
-    
-@api.get('/admin/users', tags=[admin_tag], summary="Get all users info",
+
+@api.get('/admin/users', tags=[admin_tag],
+    summary="Get all users info",
     security=[{"bearerAuth": []}],
     description="Retrieves information about all users. Admin access required.",
     responses={
@@ -485,15 +520,23 @@ def get_session():
 @requires_auth
 @requires_admin
 def get_all_users_info():
+    """ Get all users info """
     users = User.query.all()
-    users_info = [{
-        'user_id': user.id,
-        'email': user.email,
-        'name': user.name,
-        'is_admin': user.is_admin,
-        'access_token': session.get('user', {}).get('access_token') if user.id == g.current_user.id else None
-    } for user in users]
-    
+    users_info = [
+        {
+            'user_id': user.id,
+            'email': user.email,
+            'name': user.name,
+            'is_admin': user.is_admin,
+            'access_token': (
+                session.get('user', {}).get('access_token')
+                if user.id == g.current_user.id
+                else None
+            )
+        }
+        for user in users
+    ]
+
     return jsonify({
         'users': users_info
     }), 200
