@@ -178,11 +178,11 @@ This API uses Auth0 for authentication. Users need to authenticate through the `
 
 ## Technology Stack
 
--   **Flask**: Micro web framework for Python
--   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask
--   **Flask-Migrate**: Database migrations for Flask applications
--   **Flask-CORS**: CORS support for Flask
--   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation
+-   **Flask**: Micro web framework for Python.
+-   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask.
+-   **Flask-Migrate**: Database migrations for Flask applications.
+-   **Flask-CORS**: CORS support for Flask.
+-   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
 -   **Authlib**: OAuth and OpenID Connect library for Python.
 -   **SQLite**: Lightweight, serverless database engine.
 
