@@ -88,9 +88,9 @@ def get_or_create_user(payload):
             db.session.add(user)
             db.session.commit()
             logger.info("User %s created successfully.", user_id)
-        except Exception:
+        except Exception as e:
             db.session.rollback()
-            logger.error("Error creating user: %s", user_id)
+            logger.error("Error creating user: %s", user_id, str(e))
             raise
     else:
         logger.info("User %s already exists.", user_id)

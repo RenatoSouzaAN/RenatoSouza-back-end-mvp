@@ -44,7 +44,7 @@ class Product(db.Model):
     description = db.Column(db.String(120))
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.String(64), db.ForeignKey('users.id'), nullable=False, index=True)
+    user_id = db.Column(db.String(64), db.ForeignKey('users.user_id'), nullable=False, index=True)
 
     user = db.relationship('User', backref=db.backref('products', lazy=True))
 
@@ -76,13 +76,13 @@ class User(db.Model):
     Represents a user in the database.
 
     Attributes:
-        id (str): The unique identifier of the user.
+        user_id (str): The unique identifier of the user.
         email (str): The email address of the user.
         name (str): The name of the user.
         is_admin (bool): Whether the user has admin privileges.
     """
     __tablename__ = 'users'
-    id = db.Column(db.String(64), primary_key=True)
+    user_id = db.Column(db.String(64), primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     name = db.Column(db.String(120))
     is_admin = db.Column(db.Boolean, default=False)
@@ -92,7 +92,7 @@ class User(db.Model):
         Initializes a new User instance.
 
         Args:
-            id (str): The unique identifier of the user.
+            user_id (str): The unique identifier of the user.
             email (str): The email address of the user.
             name (str): The name of the user.
             is_admin (bool): Whether the user has admin privileges. Defaults to False.
@@ -110,7 +110,7 @@ class User(db.Model):
             dict: A dictionary representation of the user.
         """
         return {
-            'id': self.user_id,
+            'user_id': self.user_id,
             'email': self.email,
             'name': self.name,
             'is_admin': self.is_admin,

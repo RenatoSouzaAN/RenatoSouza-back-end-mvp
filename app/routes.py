@@ -193,7 +193,7 @@ def add_product(body: ProductInput):
         description=body.description,
         price=body.price,
         quantity=body.quantity,
-        user_id=g.current_user.id
+        user_id=g.current_user.user_id
     )
     db.session.add(new_product)
     db.session.commit()
@@ -293,7 +293,7 @@ def update_product(path: ProductIdPath, body: ProductUpdate):
     if not product:
         return jsonify({'message': 'Product not found.'}), 404
 
-    if product.user_id != g.current_user.id and not g.current_user.is_admin:
+    if product.user_id != g.current_user.user_id and not g.current_user.is_admin:
         abort(403, description="You don't have permission to edit this product.")
 
     if body.description:
@@ -386,7 +386,7 @@ def delete_product(path: ProductIdPath):
     if not  product:
         return jsonify({'message': 'Product not found'}), 404
 
-    if product.user_id != g.current_user.id and not g.current_user.is_admin:
+    if product.user_id != g.current_user.user_id and not g.current_user.is_admin:
         abort(403, description="You don't have permission to delete this product.")
 
     db.session.delete(product)
@@ -449,7 +449,7 @@ def callback():
         user = get_or_create_user(userinfo)
 
         session['user'] = {
-            'user_id': user.id,
+            'user_id': user.user_id,
             'email': user.email,
             'name': user.name,
             'access_token': token['access_token']
@@ -524,13 +524,13 @@ def get_all_users_info():
     users = User.query.all()
     users_info = [
         {
-            'user_id': user.id,
+            'user_id': user.user_id,
             'email': user.email,
             'name': user.name,
             'is_admin': user.is_admin,
             'access_token': (
                 session.get('user', {}).get('access_token')
-                if user.id == g.current_user.id
+                if user.user_id == g.current_user.user_id
                 else None
             )
         }
