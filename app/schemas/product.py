@@ -9,8 +9,6 @@ Classes:
 - ProductInput: Schema for creating a new product.
 - ProductUpdate: Schema for updating an existing product.
 - ProductIdPath: Schema for specifying a product ID in the path.
-- MessageResponse: Schema for a message response.
-- AdminSetBody: Schema for setting a user as an admin by email.
 """
 
 from pydantic import BaseModel, Field

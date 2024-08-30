@@ -18,7 +18,6 @@ from flask_openapi3 import APIBlueprint, Tag
 from ..extensions import db
 from ..auth import requires_auth
 from ..models.product import Product
-# from ..schemasOld import ProductInput, ProductUpdate, ProductIdPath
 from ..schemas.product import ProductInput, ProductUpdate, ProductIdPath
 
 product_bp = APIBlueprint('product', __name__)
