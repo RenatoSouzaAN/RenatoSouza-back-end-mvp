@@ -156,12 +156,12 @@ def requires_admin(f):
             abort(401)
 
         user = g.current_user
-        logger.debug("Checking admin status for user: %s", user.id)
+        logger.debug("Checking admin status for user: %s", user.user_id)
 
         if user and user.is_admin:
-            logger.info("Admin access granted for user: %s", user.id)
+            logger.info("Admin access granted for user: %s", user.user_id)
             return f(*args, **kwargs)
 
-        logger.warning("Admin access denied for user: %s", user.id)
+        logger.warning("Admin access denied for user: %s", user.user_id)
         abort(403)
     return decorated
