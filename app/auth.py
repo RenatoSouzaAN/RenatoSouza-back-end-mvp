@@ -26,7 +26,8 @@ from jose import jwt
 from jose.exceptions import JWTError
 
 from config import Config
-from .models import User
+from .models.user import User
+# from .modelsOld import User
 from .extensions import db
 
 logging.basicConfig(level=logging.DEBUG)

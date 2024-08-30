@@ -1,5 +1,5 @@
 """
-schemas.py
+schemas/product.py
 
 This module defines the Pydantic models (schemas) for the application,
 which are used for data validation and serialization.
@@ -56,15 +56,3 @@ class ProductIdPath(BaseModel):
     Schema for specifying a product ID in the path.
     """
     product_id: int = Field(..., description="Product ID (required)")
-
-class MessageResponse(BaseModel):
-    """
-    Schema for a message response.
-    """
-    message: str = Field(..., description="Message response")
-
-class AdminSetBody(BaseModel):
-    """
-    Schema for setting a user as an admin by email.
-    """
-    email: str = Field(..., description="Email of the user to be set as admin")

@@ -23,11 +23,11 @@ from flask import redirect, jsonify
 from flask_openapi3 import OpenAPI
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
-from cli import create_admin
+# from cli import create_admin
 
 from .extensions import db, migrate, oauth, info
 from .auth import AuthError
-from .routes import api
+from .routes import register_routes
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -50,7 +50,7 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     oauth.init_app(app)
 
-    app.cli.add_command(create_admin)
+    # app.cli.add_command(create_admin)
 
     oauth.register(
         "auth0",
@@ -70,7 +70,7 @@ def create_app():
         "in": "header"}
         }
     app.security_schemes = security_scheme
-    app.register_api(api)
+    register_routes(app)
 
     @app.errorhandler(AuthError)
     def handle_auth_error(ex):
