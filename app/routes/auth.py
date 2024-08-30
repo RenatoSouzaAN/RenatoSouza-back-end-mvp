@@ -1,10 +1,23 @@
+"""
+routes/auth.py
+This module defines the Authentication API routes for the application.
+It includes routes for:
+- User management
+Functions:
+- create_user: Handles user creation.
+- login: Initiate login process.
+- logout: Initiate logout process.
+- check_admin: Check if user is an admin.
+- set_admin: Set a user as admin.
+"""
+
 from urllib.parse import urlencode
 
 import json
 import logging
 import requests
 
-from flask import jsonify, redirect, request, url_for, session, current_app, g, abort
+from flask import jsonify, redirect, request, url_for, session, current_app, g
 from flask_openapi3 import APIBlueprint, Tag
 from config import Config
 

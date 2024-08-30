@@ -1,5 +1,5 @@
 """
-models.py
+models/product.py
 
 This module defines the SQLAlchemy `Product` model for the application.
 

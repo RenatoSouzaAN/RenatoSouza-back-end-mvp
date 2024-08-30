@@ -1,5 +1,5 @@
 """
-models.py
+models/user.py
 
 This module defines the SQLAlchemy `User` model for the application.
 

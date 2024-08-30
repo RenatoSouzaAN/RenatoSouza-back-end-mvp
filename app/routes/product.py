@@ -1,3 +1,15 @@
+"""
+routes/product.py
+This module defines the Product related API routes for the application.
+It includes routes for:
+- Product handling
+Functions:
+- get_product: Fetches details of a specific product.
+- create_product: Creates a new product.
+- update_product: Updates an existing product.
+- delete_product: Deletes a product.
+"""
+
 import logging
 
 from flask import jsonify, g, abort
