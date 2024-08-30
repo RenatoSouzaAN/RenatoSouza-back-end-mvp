@@ -18,6 +18,7 @@ Classes:
 
 import json
 import logging
+import requests
 
 from functools import wraps
 from urllib.request import urlopen
@@ -27,7 +28,6 @@ from jose.exceptions import JWTError
 
 from config import Config
 from .models.user import User
-# from .modelsOld import User
 from .extensions import db
 
 logging.basicConfig(level=logging.DEBUG)
@@ -42,6 +42,27 @@ class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
+
+def get_management_api_token():
+    token_url = f"https://{Config.AUTH0_DOMAIN}/oauth/token"
+    payload = {
+        "client_id": Config.AUTH0_MANAGEMENT_CLIENT_ID,
+        "client_secret": Config.AUTH0_MANAGEMENT_CLIENT_SECRET,
+        "audience": Config.API_AUDIENCE,
+        "grant_type": "client_credentials",
+    }
+    try:
+        response = requests.post(token_url, json=payload)
+        response.raise_for_status()
+        token = response.json().get('access_token')
+        if not token:
+            logger.error("Failed to get management token. Reponse: %s", response.text)
+            return None
+        logger.info("Successfully obtained management API token")
+        return token
+    except requests.RequestException as e:
+        logger.error("Error getting management token: %s", str(e))
+        return None
 
 def get_token_auth_header():
     """Obtains the Access Token from the Authorization Header"""

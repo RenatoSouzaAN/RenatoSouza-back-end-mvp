@@ -9,6 +9,7 @@ Functions:
 - logout: Initiate logout process.
 - check_admin: Check if user is an admin.
 - set_admin: Set a user as admin.
+- delete_user: Delete a user.
 """
 
 from urllib.parse import urlencode
@@ -22,10 +23,9 @@ from flask_openapi3 import APIBlueprint, Tag
 from config import Config
 
 from ..extensions import db, oauth
-from ..auth import requires_auth, requires_admin, get_or_create_user
+from ..auth import requires_auth, requires_admin, get_or_create_user, get_management_api_token
 from ..models.user import User
-# from ..schemasOld import AdminSetBody
-from ..schemas.admin import AdminSetBody
+from ..schemas.admin import AdminSetBody, UserIdPath
 
 auth_bp = APIBlueprint('auth', __name__)
 
@@ -52,7 +52,26 @@ def set_admin(body: AdminSetBody):
 
     user.is_admin = True
     db.session.commit()
-    return jsonify({'message': 'User set as admin successfully'}), 200
+
+    try:
+        management_api_token = get_management_api_token()
+        headers = {
+            'Authorization': f"Bearer {management_api_token}",
+            'Content-Type': 'application/json'
+        }
+
+        url = f"https://{Config.AUTH0_DOMAIN}/api/v2/users/{user.user_id}"
+        payload = {
+            "app_metadata": {
+                "is_admin": True
+            }
+        }
+        response = requests.patch(url, json=payload, headers=headers)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        logger.error("Failed to update Auth0 user metadata: %s", str(e))
+        return jsonify({'message': 'User set as admin in local database, but failed to update Auth0'}), 500
+    return jsonify({'message': 'User set as admin successfully in both local database and Auth0'}), 200
 
 @auth_bp.get('/admin/check', security=[{"bearerAuth": []}])
 @requires_auth
@@ -180,3 +199,27 @@ def get_all_users_info():
     return jsonify({
         'users': users_info
     }), 200
+
+@auth_bp.delete('/users/<string:user_id>', tags=[admin_tag],
+    summary="Delete a user",
+    security=[{"bearerAuth": []}],
+    description="Deletes a user. Admin access required.",
+    responses={
+        200: {"description": "User deleted successfully"},
+        401: {"description": "User not authenticated"},
+        403: {"description": "User not authorized (not an admin)"},
+        404: {"description": "User not found"},
+    }
+)
+@requires_auth
+@requires_admin
+def delete_user(path: UserIdPath):
+    """ Delete a user """
+    user = User.query.filter_by(user_id=path.user_id).first()
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({'message': f'User {path.user_id} deleted successfully.'}), 200
