@@ -48,7 +48,7 @@ def get_management_api_token():
     payload = {
         "client_id": Config.AUTH0_MANAGEMENT_CLIENT_ID,
         "client_secret": Config.AUTH0_MANAGEMENT_CLIENT_SECRET,
-        "audience": Config.API_AUDIENCE,
+        "audience": Config.API_MANAGEMENT_AUDIENCE,
         "grant_type": "client_credentials",
     }
     try:
@@ -66,7 +66,7 @@ def get_management_api_token():
 
 def get_token_auth_header():
     """Obtains the Access Token from the Authorization Header"""
-    logger.debug("Request headers: %s", request.headers)
+    # logger.debug("Request headers: %s", request.headers)
     auth = request.headers.get("Authorization", None)
     if not auth:
         logger.debug("No Authorization header present, checking session")
@@ -77,7 +77,7 @@ def get_token_auth_header():
                          "description": "Authorization header is expected"}, 401)
 
     parts = auth.split()
-    logger.debug("Authorization header parts: %s", parts)
+    # logger.debug("Authorization header parts: %s", parts)
 
     if parts[0].lower() != "bearer":
         logger.error("Authorization header must start with Bearer")
@@ -98,14 +98,19 @@ def get_token_auth_header():
 
 def get_or_create_user(payload):
     """Check if a user exists and creates it in case not"""
-    logger.debug("Attempting to get or create user with payload: %s", payload)
+    # logger.debug("Attempting to get or create user with payload: %s", payload)
     user_id = payload['sub']
     user = User.query.get(user_id)
+
+    app_metadata = payload.get('https://localhost:5000/app_metadata', False)
+    is_admin = bool(app_metadata)
+    logger.debug("Extracted is_admin status: %s", is_admin)
+
     if not user:
         logger.info("User %s not found. Creating new user.", user_id)
         email = payload.get('email', '')
         name = payload.get('name') or None
-        user = User(user_id=user_id, email=email, name=name)
+        user = User(user_id=user_id, email=email, name=name, is_admin=is_admin)
         try:
             db.session.add(user)
             db.session.commit()
@@ -115,7 +120,17 @@ def get_or_create_user(payload):
             logger.error("Error creating user: %s", user_id)
             raise
     else:
-        logger.info("User %s already exists.", user_id)
+        # logger.info("User %s already exists. Checking admin status.", user_id)
+        if user.is_admin != is_admin:
+            user.is_admin = is_admin
+            try:
+                db.session.commit()
+                logger.info("User %s admin status updated.", user_id)
+            except Exception:
+                db.session.rollback()
+                logger.error("Error updating user admin status: %s", user_id)
+                raise
+
     return user
 
 def requires_auth(f):

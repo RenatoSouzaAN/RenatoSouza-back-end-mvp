@@ -20,10 +20,11 @@ import requests
 
 from flask import jsonify, redirect, request, url_for, session, current_app, g
 from flask_openapi3 import APIBlueprint, Tag
+from jose import jwt
 from config import Config
 
 from ..extensions import db, oauth
-from ..auth import requires_auth, requires_admin, get_or_create_user, get_management_api_token
+from ..auth import requires_auth, requires_admin, get_or_create_user, get_management_api_token, verify_jwt, get_token_auth_header
 from ..models.user import User
 from ..schemas.admin import AdminSetBody, UserIdPath
 
@@ -151,7 +152,7 @@ def logout():
     }
 )
 @requires_auth
-@requires_admin
+# @requires_admin
 def get_session():
     """ Get current session info """
     user = session.get('user', None)
@@ -223,3 +224,58 @@ def delete_user(path: UserIdPath):
     db.session.commit()
 
     return jsonify({'message': f'User {path.user_id} deleted successfully.'}), 200
+
+
+@auth_bp.get('/debug/token', tags=[admin_tag],
+    summary="Debug token contents",
+    security=[{"bearerAuth": []}],
+    description="Displays the contents of the decoded token for debugging purposes.",
+    responses={
+        200: {"description": "Returns decoded token contents"},
+        401: {"description": "User not authenticated"},
+    }
+)
+@requires_auth
+@requires_admin
+def debug_token():
+    """ Debug token contents """
+    token = get_token_auth_header()
+    try:
+        decoded = verify_jwt(token)
+        return jsonify({
+            'decoded_token': decoded,
+            'app_metadata': decoded.get(f'https://{Config.AUTH0_DOMAIN}/app_metadata', {}),
+            'all_custom_claims': {k: v for k, v in decoded.items() if k.startswith('https://')},
+            'token_header': jwt.get_unverified_header(token)
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 401
+
+
+@auth_bp.get('/debug/userinfo', tags=[admin_tag],
+    summary="Debug user info",
+    security=[{"bearerAuth": []}],
+    description="Fetches and displays user info directly from Auth0",
+    responses={
+        200: {"description": "Returns user info from Auth0"},
+        401: {"description": "User not authenticated"},
+    }
+)
+@requires_auth
+@requires_admin
+def debug_userinfo():
+    """ Debug user info """
+    token = get_token_auth_header()
+    headers = {'Authorization': f'Bearer {token}'}
+    userinfo_endpoint = f"https://{Config.AUTH0_DOMAIN}/userinfo"
+    
+    try:
+        response = requests.get(userinfo_endpoint, headers=headers)
+        response.raise_for_status()
+        userinfo = response.json()
+        return jsonify({
+            'userinfo': userinfo,
+            'app_metadata': userinfo.get(f'https://{Config.AUTH0_DOMAIN}/app_metadata', {})
+        }), 200
+    except requests.RequestException as e:
+        return jsonify({'error': str(e)}), 401
