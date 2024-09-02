@@ -74,7 +74,9 @@ def set_admin(body: AdminSetBody):
         return jsonify({'message': 'User set as admin in local database, but failed to update Auth0'}), 500
     return jsonify({'message': 'User set as admin successfully in both local database and Auth0'}), 200
 
-@auth_bp.get('/admin/check', security=[{"bearerAuth": []}])
+@auth_bp.get('/admin/check', tags=[admin_tag], summary="Check if user is an admin",
+    description="Check if user is an admin.",
+    security=[{"bearerAuth": []}])
 @requires_auth
 def check_admin():
     """Check if user is an admin"""
@@ -143,9 +145,10 @@ def logout():
     return redirect(f'https://{auth0_domain}/v2/logout?{urlencode(params)}')
 
 @auth_bp.get('/session', tags=[admin_tag],
-    summary="Get current session info",
+    summary="Get current session info, must be called through browser",
     security=[{"bearerAuth": []}],
-    description="Retrieves information about the current user session.",
+    description="Retrieves information about the current user session."
+    " This was made to be called through a browser, because of how Authenticator headers work.",
     responses={
         200: {"description": "Returns session information for authenticated user"},
         401: {"description": "User not authenticated"},
@@ -229,7 +232,8 @@ def delete_user(path: UserIdPath):
 @auth_bp.get('/debug/token', tags=[admin_tag],
     summary="Debug token contents",
     security=[{"bearerAuth": []}],
-    description="Displays the contents of the decoded token for debugging purposes.",
+    description="Displays the contents of the decoded token for debugging purposes."
+    " Admin access required.",
     responses={
         200: {"description": "Returns decoded token contents"},
         401: {"description": "User not authenticated"},
@@ -255,7 +259,8 @@ def debug_token():
 @auth_bp.get('/debug/userinfo', tags=[admin_tag],
     summary="Debug user info",
     security=[{"bearerAuth": []}],
-    description="Fetches and displays user info directly from Auth0",
+    description="Fetches and displays user info directly from Auth0."
+    " Admin access required.",
     responses={
         200: {"description": "Returns user info from Auth0"},
         401: {"description": "User not authenticated"},
