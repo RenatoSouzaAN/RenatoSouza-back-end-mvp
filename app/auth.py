@@ -22,7 +22,7 @@ import requests
 
 from functools import wraps
 from urllib.request import urlopen
-from flask import request, g, abort, session
+from flask import request, g, abort, session, jsonify
 from jose import jwt
 from jose.exceptions import JWTError
 
@@ -66,7 +66,6 @@ def get_management_api_token():
 
 def get_token_auth_header():
     """Obtains the Access Token from the Authorization Header"""
-    # logger.debug("Request headers: %s", request.headers)
     auth = request.headers.get("Authorization", None)
     if not auth:
         logger.debug("No Authorization header present, checking session")
@@ -77,7 +76,7 @@ def get_token_auth_header():
                          "description": "Authorization header is expected"}, 401)
 
     parts = auth.split()
-    # logger.debug("Authorization header parts: %s", parts)
+    logger.debug("Authorization header parts: %s", parts)
 
     if parts[0].lower() != "bearer":
         logger.error("Authorization header must start with Bearer")
@@ -93,12 +92,10 @@ def get_token_auth_header():
                          "description": "Authorization header must be Bearer token"}, 401)
 
     token = parts[1]
-
     return token
 
 def get_or_create_user(payload):
     """Check if a user exists and creates it in case not"""
-    # logger.debug("Attempting to get or create user with payload: %s", payload)
     user_id = payload['sub']
     user = User.query.get(user_id)
 
@@ -120,7 +117,6 @@ def get_or_create_user(payload):
             logger.error("Error creating user: %s", user_id)
             raise
     else:
-        # logger.info("User %s already exists. Checking admin status.", user_id)
         if user.is_admin != is_admin:
             user.is_admin = is_admin
             try:
@@ -137,53 +133,61 @@ def requires_auth(f):
     """Determines if the Access Token is valid"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = get_token_auth_header()
         try:
+            token = get_token_auth_header()
+            logger.debug(f"Token received: {token[:10]}...")
             payload = verify_jwt(token)
+            g.current_user = get_or_create_user(payload)
+            return f(*args, **kwargs)
+        except AuthError as e:
+            return jsonify(e.error), e.status_code
         except Exception as e:
             logger.error("Error verifying JWT: %s", str(e))
             raise AuthError({"code": "invalid_token",
                                  "description": str(e)}, 401) from e
-
-        g.current_user = get_or_create_user(payload)
-        return f(*args, **kwargs)
     return decorated
 
 def verify_jwt(token):
     """Verifies the JWT token"""
-    jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
-    with urlopen(jwks_url) as response:
-        jwks = json.loads(response.read())
-
-    unverified_header = jwt.get_unverified_header(token)
-    rsa_key = {}
-
-    for key in jwks["keys"]:
-        if key["kid"] == unverified_header["kid"]:
-            rsa_key = {
-                "kty": key["kty"],
-                "kid": key["kid"],
-                "use": key["use"],
-                "n": key["n"],
-                "e": key["e"]
-            }
-
-    if rsa_key:
-        try:
-            payload = jwt.decode(
-                token,
-                rsa_key,
-                algorithms=ALGORITHMS,
-                audience=API_AUDIENCE,
-                issuer=f"https://{AUTH0_DOMAIN}/"
-            )
-            return payload
-        except JWTError as e:
-            raise AuthError({"code": "invalid_token",
-                             "description": str(e)}, 401) from e
-    raise AuthError({"code": "invalid_header",
-                     "description": "Unable to find appropriate key"}, 401)
-
+    try:
+        jsonurl = urlopen(f"https://{AUTH0_DOMAIN}/.well-known/jwks.json")
+        jwks = json.loads(jsonurl.read())
+        unverified_header = jwt.get_unverified_header(token)
+        rsa_key = {}
+        for key in jwks["keys"]:
+            if key["kid"] == unverified_header["kid"]:
+                rsa_key = {
+                    "kty": key["kty"],
+                    "kid": key["kid"],
+                    "use": key["use"],
+                    "n": key["n"],
+                    "e": key["e"]
+                }
+        if rsa_key:
+            try:
+                payload = jwt.decode(
+                    token,
+                    rsa_key,
+                    algorithms=ALGORITHMS,
+                    audience=API_AUDIENCE,
+                    issuer=f"https://{AUTH0_DOMAIN}/"
+                )
+                return payload
+            except jwt.ExpiredSignatureError:
+                raise AuthError({"code": "token_expired",
+                                "description": "Token is expired"}, 401)
+            except jwt.JWTClaimsError:
+                raise AuthError({"code": "invalid_claims",
+                                "description": "Incorrect claims, please check the audience and issuer"}, 401)
+            except Exception:
+                logger.error(f"Error decoding token: {str(e)}")
+                raise AuthError({"code": "invalid_header",
+                                "description": "Unable to parse authentication token."}, 401)
+        raise AuthError({"code": "invalid_header",
+                        "description": "Unable to find appropriate key"}, 401)
+    except Exception as e:
+        logger.error("Error in verify_jwt: %s", str(e))
+        raise
 def requires_admin(f):
     """Determines if the user is an admin"""
     @wraps(f)
@@ -202,3 +206,21 @@ def requires_admin(f):
         logger.warning("Admin access denied for user: %s", user.user_id)
         abort(403)
     return decorated
+
+def get_user_by_id(user_id):
+    """
+    Fetch a user from the database by their user_id.
+
+    Args:
+        user_id (str): The unique identifier of the user.
+
+    Returns:
+        User: The User object if found.
+
+    Raises:
+        404: If the user is not found in the database.
+    """
+    user = User.query.filter_by(user_id=user_id).first()
+    if user is None:
+        abort(404, description=f"User with id {user_id} not found")
+    return user

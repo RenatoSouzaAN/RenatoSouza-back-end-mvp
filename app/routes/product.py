@@ -169,26 +169,30 @@ def get_products():
 @requires_auth
 def add_product(body: ProductInput):
     """Add a new product"""
-    if not body.name:
-        return jsonify({'message': 'Name is required'}), 400
+    try:
+        if not body.name:
+            return jsonify({'message': 'Name is required'}), 400
 
-    if body.price < 1:
-        return jsonify({'message': 'Price must be higher than 0.'}), 400
+        if body.price < 1:
+            return jsonify({'message': 'Price must be higher than 0.'}), 400
 
-    if body.quantity < 1:
-        return jsonify({'message': 'Quantity must be higher than 0.'}), 400
+        if body.quantity < 1:
+            return jsonify({'message': 'Quantity must be higher than 0.'}), 400
 
-    new_product = Product(
-        name=body.name,
-        description=body.description,
-        price=body.price,
-        quantity=body.quantity,
-        user_id=g.current_user.user_id
-    )
-    db.session.add(new_product)
-    db.session.commit()
-    return jsonify({'message': 'Product added successfully!'}), 202
-
+        new_product = Product(
+            name=body.name,
+            description=body.description,
+            price=body.price,
+            quantity=body.quantity,
+            user_id=g.current_user.user_id
+        )
+        db.session.add(new_product)
+        db.session.commit()
+        return jsonify({'message': 'Product added successfully!'}), 202
+    except Exception as e:
+        logger.error("Error adding product: %s", str(e))
+        db.session.rollback()
+        return jsonify({'message': 'An error ocurred while adding the product.'}), 500
 @product_bp.put('/products/<int:product_id>/update', tags=[product_tag],
     summary="Update an existing product's description, price, "
             "and quantity in the 'products' database, through 'Request Body'.",

@@ -21,10 +21,11 @@ import requests
 from flask import jsonify, redirect, request, url_for, session, current_app, g
 from flask_openapi3 import APIBlueprint, Tag
 from jose import jwt
+from authlib.integrations.base_client.errors import MismatchingStateError
 from config import Config
 
 from ..extensions import db, oauth
-from ..auth import requires_auth, requires_admin, get_or_create_user, get_management_api_token, verify_jwt, get_token_auth_header
+from ..auth import requires_auth, requires_admin, get_or_create_user, get_management_api_token, verify_jwt, get_token_auth_header, get_user_by_id
 from ..models.user import User
 from ..schemas.admin import AdminSetBody, UserIdPath
 
@@ -33,6 +34,72 @@ auth_bp = APIBlueprint('auth', __name__)
 admin_tag = Tag(name='admin', description='Admin operations')
 
 logger = logging.getLogger(__name__)
+
+@auth_bp.get('/callback',
+    summary="Auth0 callback",
+    description="Handles the callback from Auth0 after user authentication."
+)
+def callback():
+    """ Handles the callback from Auth0 after user authentication. """
+    try:
+        token = oauth.auth0.authorize_access_token()
+
+        userinfo_endpoint = f"https://{Config.AUTH0_DOMAIN}/userinfo"
+        resp = oauth.auth0.get(userinfo_endpoint)
+        resp.raise_for_status()
+        userinfo = resp.json()
+
+        user = get_or_create_user(userinfo)
+
+        session['user'] = {
+            'user_id': user.user_id,
+            'email': user.email,
+            'name': user.name,
+            'access_token': token['access_token']
+        }
+        return redirect("/")
+    except MismatchingStateError:
+        logger.debug("Received state: %s", request.args.get('state'))
+        logger.debug("Session state: %s", session.get('_state'))
+        return jsonify({"error": "State mismatch. Possible CSRF attack."}), 400
+    except oauth.OAuth2Error as e:
+        logger.error("OAuth error in callback: %s", str(e))
+        return jsonify({"error": "OAuth authentication error"}), 500
+    except requests.HTTPError as e:
+        logger.error("HTTP error during user info fetch: %s", str(e))
+        return jsonify({"error": "Failed to fetch user information"}), 500
+    except json.JSONDecodeError as e:
+        logger.error("Error decoding JSON response: %s", str(e))
+        return jsonify({"error": "Failed to decode user information"}), 500
+    except RuntimeError as e:
+        logger.error("Unexpected error in callback: %s", str(e), exc_info=True)
+        return jsonify({"error": "An unexpected error occurred"}), 500
+
+@auth_bp.get('/login',
+    summary="Initiate login process",
+    description="Redirects the user to the Auth0 login page."
+)
+def login():
+    """ Initiate login process """
+    return oauth.auth0.authorize_redirect(
+        redirect_uri=url_for("auth.callback", _external=True),
+        audience=Config.API_AUDIENCE,
+        scope="openid profile email"
+    )
+
+@auth_bp.get('/logout',
+    summary="Logout user",
+    description="Clears the user session and redirects to Auth0 logout."
+)
+def logout():
+    """ Logout user """
+    session.clear()
+    params = {
+        'returnTo': request.url_root,
+        'client_id': current_app.config['CLIENT_ID']
+    }
+    auth0_domain = current_app.config['AUTH0_DOMAIN']
+    return redirect(f'https://{auth0_domain}/v2/logout?{urlencode(params)}')
 
 @auth_bp.post('/admin/set', tags=[admin_tag],
     summary="Set a user as admin",
@@ -82,68 +149,6 @@ def check_admin():
     """Check if user is an admin"""
     return jsonify({'is_admin': g.current_user.is_admin}), 200
 
-@auth_bp.get('/login',
-    summary="Initiate login process",
-    description="Redirects the user to the Auth0 login page."
-)
-def login():
-    """ Initiate login process """
-    return oauth.auth0.authorize_redirect(
-        redirect_uri=url_for("auth.callback", _external=True),
-        audience=Config.API_AUDIENCE,
-        scope="openid profile email"
-    )
-
-@auth_bp.get('/callback',
-    summary="Auth0 callback",
-    description="Handles the callback from Auth0 after user authentication."
-)
-def callback():
-    """ Handles the callback from Auth0 after user authentication. """
-    try:
-        token = oauth.auth0.authorize_access_token()
-
-        userinfo_endpoint = f"https://{Config.AUTH0_DOMAIN}/userinfo"
-        resp = oauth.auth0.get(userinfo_endpoint)
-        resp.raise_for_status()
-        userinfo = resp.json()
-
-        user = get_or_create_user(userinfo)
-
-        session['user'] = {
-            'user_id': user.user_id,
-            'email': user.email,
-            'name': user.name,
-            'access_token': token['access_token']
-        }
-        return redirect("/")
-    except oauth.OAuth2Error as e:
-        logger.error("OAuth error in callback: %s", str(e))
-        return jsonify({"error": "OAuth authentication error"}), 500
-    except requests.HTTPError as e:
-        logger.error("HTTP error during user info fetch: %s", str(e))
-        return jsonify({"error": "Failed to fetch user information"}), 500
-    except json.JSONDecodeError as e:
-        logger.error("Error decoding JSON response: %s", str(e))
-        return jsonify({"error": "Failed to decode user information"}), 500
-    except RuntimeError as e:
-        logger.error("Unexpected error in callback: %s", str(e), exc_info=True)
-        return jsonify({"error": "An unexpected error occurred"}), 500
-
-@auth_bp.get('/logout',
-    summary="Logout user",
-    description="Clears the user session and redirects to Auth0 logout."
-)
-def logout():
-    """ Logout user """
-    session.clear()
-    params = {
-        'returnTo': request.url_root,
-        'client_id': current_app.config['CLIENT_ID']
-    }
-    auth0_domain = current_app.config['AUTH0_DOMAIN']
-    return redirect(f'https://{auth0_domain}/v2/logout?{urlencode(params)}')
-
 @auth_bp.get('/session', tags=[admin_tag],
     summary="Get current session info, must be called through browser",
     security=[{"bearerAuth": []}],
@@ -155,7 +160,7 @@ def logout():
     }
 )
 @requires_auth
-# @requires_admin
+@requires_admin
 def get_session():
     """ Get current session info """
     user = session.get('user', None)
@@ -284,3 +289,34 @@ def debug_userinfo():
         }), 200
     except requests.RequestException as e:
         return jsonify({'error': str(e)}), 401
+
+@auth_bp.get('/user')
+def get_user():
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({"error": "Missing token"}), 401
+    
+    try:
+        if token.startswith('Bearer '):
+            token = token[7:]
+        
+        payload = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+        user_id = payload['user_id']
+        user = get_user_by_id(user_id)
+        return jsonify({
+            'user_id': user.user_id,
+            'email': user.email,
+            'name': user.name
+        })
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+
+
+@auth_bp.get('/api/user')
+def get_api_user():
+    user = session.get('user')
+    if user:
+        return jsonify(user), 200
+    return jsonify({"error": "User not authenticated"}), 401

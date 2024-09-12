@@ -1,3 +1,7 @@
+import tracemalloc
+
+tracemalloc.start()
+
 from app import create_app
 
 app = create_app()

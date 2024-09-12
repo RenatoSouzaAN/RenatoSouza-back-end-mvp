@@ -11,3 +11,12 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')
     AUTH0_MANAGEMENT_CLIENT_ID= os.getenv('AUTH0_MANAGEMENT_CLIENT_ID', 'your-auth0-management-client-id')
     AUTH0_MANAGEMENT_CLIENT_SECRET = os.getenv('AUTH0_MANAGEMENT_CLIENT_SECRET', 'your-auth0-management-client-secret')
+
+    SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')
+    SESSION_TYPE = 'filesystem'
+    SESSION_PERMANENT = False
+    SESSION_USE_SIGNER = True
+    SESSION_COOKIE_NAME = 'session'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'None'

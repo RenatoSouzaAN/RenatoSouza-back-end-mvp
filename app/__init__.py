@@ -44,9 +44,16 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../database/dmarket.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_PERMANENT'] = False
+    app.config['SESSION_USE_SIGNER'] = True
+
     db.init_app(app)
     migrate.init_app(app, db)
-    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
     oauth.init_app(app)
 
     oauth.register(
@@ -55,7 +62,8 @@ def create_app():
         client_secret=app.config['CLIENT_SECRET'],
         client_kwargs={
             "scope": "openid profile email",
-            "audience": app.config['API_AUDIENCE']
+            "audience": app.config['API_AUDIENCE'],
+            "verify": False
         },
         server_metadata_url=f'https://{app.config["AUTH0_DOMAIN"]}/.well-known/openid-configuration'
     )
@@ -92,3 +100,4 @@ def create_app():
         return redirect('/openapi')
 
     return app
+
