@@ -11,7 +11,6 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
     -   [Explanation](#explanation)
--   [Configuration](#configuration)
 -   [Running the Server](#running-the-server)
 -   [API Documentation](#api-documentation)
 -   [API Endpoints](#api-endpoints)
@@ -56,13 +55,23 @@ It's highly recommended to use a virtual environment.
     cd RenatoSouza-back-end-mvp
     ```
 
-2. Create virtual environment (Optional):
+2. Create a `.env` file in the root directory with the following content:
+   ```
+   AUTH0_DOMAIN=your_auth0_domain
+   API_AUDIENCE=your_api_audience
+   CLIENT_ID=your_client_id
+   CLIENT_SECRET=your_client_secret
+   AUTH0_MANAGEMENT_CLIENT_ID=your-auth0-management-client-id
+   AUTH0_MANAGEMENT_CLIENT_SECRET=your-auth0-management-client-secret
+   ```
+
+3. Create virtual environment (Optional):
 
     ```
     python -m venv env
     ```
 
-3. Access virtual environment (Optional):
+4. Access virtual environment (Optional):
 
     On Powershell:
 
@@ -76,13 +85,13 @@ It's highly recommended to use a virtual environment.
     source \env\Scripts\activate
     ```
 
-4. Install dependencies:
+5. Install dependencies:
 
     ```
     pip install -r requirements.txt
     ```
 
-5. Set up the database:
+6. Set up the database:
     ```
     flask db init
     flask db migrate
@@ -98,18 +107,6 @@ These commands (`flask db init`, `flask db migrate`, `flask db upgrade`) are use
 -   **`flask db upgrade`**: Applies the migration script to the database, making the necessary changes to the schema to reflect the changes in your models.
 
 These steps are crucial whenever you make changes to your database models (`models.py` in this case) to ensure that your database schema stays up-to-date with your application's data model.
-
-### Configuration
-
-1. Create a `.env` file in the root directory with the following content:
-   ```
-   AUTH0_DOMAIN=your_auth0_domain
-   API_AUDIENCE=your_api_audience
-   CLIENT_ID=your_client_id
-   CLIENT_SECRET=your_client_secret
-   AUTH0_MANAGEMENT_CLIENT_ID=your-auth0-management-client-id
-   AUTH0_MANAGEMENT_CLIENT_SECRET=your-auth0-management-client-secret
-   ```
 
 ### Running the Server
 
