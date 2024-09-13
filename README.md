@@ -7,6 +7,7 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 ## Table of Contents
 
 -   [Features](#features)
+-   [Technology Stack](#technology-stack)
 -   [Setup](#setup)
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
@@ -24,7 +25,6 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
     -   [Get all users](#get-all-users)
 -   [Responses](#responses)
 -   [Authentication](#authentication)
--   [Technology Stack](#technology-stack)
 -   [Contributors](#contributors)
 -   [License](#license)
 
@@ -35,6 +35,17 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 -   CRUD operations for products
 -   User-specific product management
 -   OpenAPI 3 documentation
+
+## Technology Stack
+This back-end is built using the following technologies:
+
+-   **Flask**: Micro web framework for Python.
+-   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask.
+-   **Flask-Migrate**: Database migrations for Flask applications.
+-   **Flask-CORS**: CORS support for Flask.
+-   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
+-   **Authlib**: OAuth and OpenID Connect library for Python.
+-   **SQLite**: Lightweight, serverless database engine.
 
 ## Setup
 
@@ -174,16 +185,6 @@ OpenAPI 3 is integrated for API documentation. After starting the server, visit 
 ## Authentication
 
 This API uses Auth0 for authentication. Users need to authenticate through the `/login` endpoint, which will redirect to Auth0 for login. After successful authentication, users receive a JWT token which should be included in the `Authorization` header for authenticated requests.
-
-## Technology Stack
-
--   **Flask**: Micro web framework for Python.
--   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask.
--   **Flask-Migrate**: Database migrations for Flask applications.
--   **Flask-CORS**: CORS support for Flask.
--   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
--   **Authlib**: OAuth and OpenID Connect library for Python.
--   **SQLite**: Lightweight, serverless database engine.
 
 ## Contributors
 
