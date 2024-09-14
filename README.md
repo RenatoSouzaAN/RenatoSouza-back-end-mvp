@@ -78,8 +78,8 @@ It's highly recommended to use a virtual environment.
    API_AUDIENCE=your_api_audience
    CLIENT_ID=your_client_id
    CLIENT_SECRET=your_client_secret
-   AUTH0_MANAGEMENT_CLIENT_ID=your-auth0-management-client-id
-   AUTH0_MANAGEMENT_CLIENT_SECRET=your-auth0-management-client-secret
+   API_MANAGEMENT_CLIENT_ID=your-auth0-management-client-id
+   API_MANAGEMENT_CLIENT_SECRET=your-auth0-management-client-secret
    ```
 
 3. Create virtual environment (Optional):
