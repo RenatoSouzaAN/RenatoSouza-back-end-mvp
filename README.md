@@ -8,6 +8,7 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 
 -   [Features](#features)
 -   [Technology Stack](#technology-stack)
+-   [Front-end Repository](#front-end-repository)
 -   [Setup](#setup)
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
@@ -46,6 +47,11 @@ This back-end is built using the following technologies:
 -   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
 -   **Authlib**: OAuth and OpenID Connect library for Python.
 -   **SQLite**: Lightweight, serverless database engine.
+
+## Front-end Repository
+
+The front-end for this project has its own repository. You can find it here:
+[https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react](https://github.com/RenatoSouzaAN/RenatoSouza/back-end-mvp-react)
 
 ## Setup
 
