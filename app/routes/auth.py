@@ -320,3 +320,13 @@ def get_api_user():
     if user:
         return jsonify(user), 200
     return jsonify({"error": "User not authenticated"}), 401
+
+@auth_bp.get('/get-client-credentials-token', tags=[admin_tag])
+@requires_auth
+def get_client_credentials_token():
+    """ Fetches a client credentials token. """
+    token = get_management_api_token()
+    if token:
+        return jsonify({'access_token': token}), 200
+    else:
+        return jsonify({'error': 'Unable to fetch token'}), 500

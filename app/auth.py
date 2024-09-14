@@ -46,8 +46,8 @@ class AuthError(Exception):
 def get_management_api_token():
     token_url = f"https://{Config.AUTH0_DOMAIN}/oauth/token"
     payload = {
-        "client_id": Config.AUTH0_MANAGEMENT_CLIENT_ID,
-        "client_secret": Config.AUTH0_MANAGEMENT_CLIENT_SECRET,
+        "client_id": Config.API_MANAGEMENT_CLIENT_ID,
+        "client_secret": Config.API_MANAGEMENT_CLIENT_SECRET,
         "audience": Config.API_MANAGEMENT_AUDIENCE,
         "grant_type": "client_credentials",
     }
