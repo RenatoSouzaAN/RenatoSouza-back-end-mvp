@@ -7,11 +7,11 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 ## Table of Contents
 
 -   [Features](#features)
+-   [Technology Stack](#technology-stack)
 -   [Setup](#setup)
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
     -   [Explanation](#explanation)
--   [Configuration](#configuration)
 -   [Running the Server](#running-the-server)
 -   [API Documentation](#api-documentation)
 -   [API Endpoints](#api-endpoints)
@@ -25,7 +25,6 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
     -   [Get all users](#get-all-users)
 -   [Responses](#responses)
 -   [Authentication](#authentication)
--   [Technology Stack](#technology-stack)
 -   [Contributors](#contributors)
 -   [License](#license)
 
@@ -36,6 +35,17 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 -   CRUD operations for products
 -   User-specific product management
 -   OpenAPI 3 documentation
+
+## Technology Stack
+This back-end is built using the following technologies:
+
+-   **Flask**: Micro web framework for Python.
+-   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask.
+-   **Flask-Migrate**: Database migrations for Flask applications.
+-   **Flask-CORS**: CORS support for Flask.
+-   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
+-   **Authlib**: OAuth and OpenID Connect library for Python.
+-   **SQLite**: Lightweight, serverless database engine.
 
 ## Setup
 
@@ -56,13 +66,23 @@ It's highly recommended to use a virtual environment.
     cd RenatoSouza-back-end-mvp
     ```
 
-2. Create virtual environment (Optional):
+2. Create a `.env` file in the root directory with the following content:
+   ```
+   AUTH0_DOMAIN=your_auth0_domain
+   API_AUDIENCE=your_api_audience
+   CLIENT_ID=your_client_id
+   CLIENT_SECRET=your_client_secret
+   AUTH0_MANAGEMENT_CLIENT_ID=your-auth0-management-client-id
+   AUTH0_MANAGEMENT_CLIENT_SECRET=your-auth0-management-client-secret
+   ```
+
+3. Create virtual environment (Optional):
 
     ```
     python -m venv env
     ```
 
-3. Access virtual environment (Optional):
+4. Access virtual environment (Optional):
 
     On Powershell:
 
@@ -76,13 +96,13 @@ It's highly recommended to use a virtual environment.
     source \env\Scripts\activate
     ```
 
-4. Install dependencies:
+5. Install dependencies:
 
     ```
     pip install -r requirements.txt
     ```
 
-5. Set up the database:
+6. Set up the database:
     ```
     flask db init
     flask db migrate
@@ -98,16 +118,6 @@ These commands (`flask db init`, `flask db migrate`, `flask db upgrade`) are use
 -   **`flask db upgrade`**: Applies the migration script to the database, making the necessary changes to the schema to reflect the changes in your models.
 
 These steps are crucial whenever you make changes to your database models (`models.py` in this case) to ensure that your database schema stays up-to-date with your application's data model.
-
-### Configuration
-
-1. Create a `.env` file in the root directory with the following content:
-   ```
-   AUTH0_DOMAIN=your_auth0_domain
-   API_AUDIENCE=your_api_audience
-   CLIENT_ID=your_client_id
-   CLIENT_SECRET=your_client_secret
-   ```
 
 ### Running the Server
 
@@ -175,16 +185,6 @@ OpenAPI 3 is integrated for API documentation. After starting the server, visit 
 ## Authentication
 
 This API uses Auth0 for authentication. Users need to authenticate through the `/login` endpoint, which will redirect to Auth0 for login. After successful authentication, users receive a JWT token which should be included in the `Authorization` header for authenticated requests.
-
-## Technology Stack
-
--   **Flask**: Micro web framework for Python.
--   **Flask-SQLAlchemy**: SQLAlchemy extension for Flask.
--   **Flask-Migrate**: Database migrations for Flask applications.
--   **Flask-CORS**: CORS support for Flask.
--   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
--   **Authlib**: OAuth and OpenID Connect library for Python.
--   **SQLite**: Lightweight, serverless database engine.
 
 ## Contributors
 
