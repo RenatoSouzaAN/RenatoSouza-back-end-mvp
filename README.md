@@ -4,7 +4,7 @@ This API is a Flask-based RESTful API for managing products in a market database
 
 The front-end has its own repository; the link is provided below.
 
-Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react
+Front-end repository: [https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react](https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react)
 
 ## Table of Contents
 
