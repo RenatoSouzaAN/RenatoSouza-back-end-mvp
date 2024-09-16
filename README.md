@@ -145,13 +145,13 @@ Navigate to the directory containing the Dockerfile and requirements.txt in your
 $ docker build -t renatosouza-back-end-mvp .
 ```
 
-Once the image is created, to run the container, ** execute as an administrator** the following command:
+Once the image is created, to run the container, **execute as an administrator** the following command:
 
 ```
-$ docker run -p 5000:5000 rest-api
+$ docker run -p 5000:5000 renatosouza-back-end-mvp
 ```
 
-Once running, to access the API, open [http://localhost:5000/](http://localhost:5000/) in your browser. If you have the front-end repository downloaded, you can also run it now to test the whole project.
+Once running, to access the API, open [http://localhost:5000/](http://localhost:5000/) in your browser. If you have the front-end repository downloaded, you can also run it now and go to its address (http://localhost:3000/) to test the whole project.
 
 ## Running the Server
 
