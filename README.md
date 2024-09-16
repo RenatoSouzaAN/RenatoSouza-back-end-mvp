@@ -1,11 +1,14 @@
 # Back-End (API) MVP
 
-This API is a Flask-based RESTful API for managing products in a market database. It includes user authentication, admin functionality, and CRUD operations for products. The API is documented using OpenAPI 3 and is designed to work with a separate front-end application. -- The front-end has it own repository, the link for is below --
+This API is a Flask-based RESTful API for managing products in a market database. It includes user authentication, admin functionality, and CRUD operations for products. The API is documented using OpenAPI 3 and is designed to work with a separate front-end application.
 
-Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
+The front-end has its own repository; the link is provided below.
+
+Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react
 
 ## Table of Contents
 
+-   [About](#about)
 -   [Features](#features)
 -   [Technology Stack](#technology-stack)
 -   [Front-end Repository](#front-end-repository)
@@ -30,6 +33,10 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 -   [Contributors](#contributors)
 -   [License](#license)
 
+## About
+
+This back-end API manages market products and supports user authentication with Auth0. It's built with Flask and supports operations like adding, updating, and deleting products. Admin functionality is also included for managing users. It works alongside a separate front-end, linked below.
+
 ## Features
 
 -   User authentication with Auth0
@@ -39,6 +46,7 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 -   OpenAPI 3 documentation
 
 ## Technology Stack
+
 This back-end is built using the following technologies:
 
 -   **Flask**: Micro web framework for Python.
@@ -52,7 +60,7 @@ This back-end is built using the following technologies:
 ## Front-end Repository
 
 The front-end for this project has its own repository. You can find it here:
-[https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react](https://github.com/RenatoSouzaAN/RenatoSouza/back-end-mvp-react)
+[https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react](https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react)
 
 ## Setup
 
@@ -74,6 +82,7 @@ It's highly recommended to use a virtual environment.
     ```
 
 2. Create a `.env` file in the root directory with the following content:
+
    ```
    AUTH0_DOMAIN=your_auth0_domain
    API_AUDIENCE=your_api_audience
@@ -116,28 +125,27 @@ It's highly recommended to use a virtual environment.
     flask db upgrade
     ```
 
-### Explanation:
+### Explanation
 
-These commands (`flask db init`, `flask db migrate`, `flask db upgrade`) are used with Flask-Migrate to initialize a migrations directory, generate migration scripts based on changes in your models, and apply those migrations to your database schema.
+These commands ensure that your database schema is synchronized with your models:
 
--   **`flask db init`**: Initializes a new migration repository in your project, creating a `migrations` directory where migration scripts will be stored.
--   **`flask db migrate`**: Analyzes the current state of your models and generates a migration script that outlines the changes needed to synchronize the database schema with the current state of your models.
--   **`flask db upgrade`**: Applies the migration script to the database, making the necessary changes to the schema to reflect the changes in your models.
+-   **`flask db init`**: Initializes a new migration repository in your project.
+-   **`flask db migrate`**: Generates a migration script to align the database schema with your models.
+-   **`flask db upgrade`**: Applies the migration script to update the database schema.
 
-These steps are crucial whenever you make changes to your database models (`models.py` in this case) to ensure that your database schema stays up-to-date with your application's data model.
+These steps are crucial whenever you make changes to your database models to keep the schema up to date.
 
 ### Docker
 
-To run the back-end through Docker, certify that you have [Docker](https://docs.docker.com/engine/install/) installed and running in your machine.
+To run the back-end through Docker, ensure you have [Docker](https://docs.docker.com/engine/install/) installed and running on your machine.
 
-Go to the directory that contains the Dockerfile and requirements.txt in your terminal.
-Executa **as administrator** the following command to build the docker image:
+Navigate to the directory containing the Dockerfile and requirements.txt in your terminal. Execute **as administrator** the following command to build the Docker image:
 
 ```
 $ docker build -t renatosouza-back-end-mvp .
 ```
 
-Once the image is created, to run the container, you have to, **as an administrator**, run the following command:
+Once the image is created, to run the container, ** execute as an administrator** the following command:
 
 ```
 $ docker run -p 5000:5000 rest-api
@@ -218,4 +226,4 @@ This API uses Auth0 for authentication. Users need to authenticate through the `
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](RenatoSouza-back-end-mvp\LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
