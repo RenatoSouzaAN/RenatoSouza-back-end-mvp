@@ -11,7 +11,6 @@ Front-end repository: [https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mv
 -   [About](#about)
 -   [Features](#features)
 -   [Technology Stack](#technology-stack)
--   [Front-end Repository](#front-end-repository)
 -   [Setup](#setup)
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
@@ -35,7 +34,7 @@ Front-end repository: [https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mv
 
 ## About
 
-This back-end API manages market products and supports user authentication with Auth0. It's built with Flask and supports operations like adding, updating, and deleting products. Admin functionality is also included for managing users. It works alongside a separate front-end, linked below.
+This back-end API manages market products and supports user authentication with Auth0. It's built with Flask and supports operations like adding, updating, and deleting products. Admin functionality is also included for managing users. It works alongside a separate front-end, linked above.
 
 ## Features
 
@@ -56,11 +55,6 @@ This back-end is built using the following technologies:
 -   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
 -   **Authlib**: OAuth and OpenID Connect library for Python.
 -   **SQLite**: Lightweight, serverless database engine.
-
-## Front-end Repository
-
-The front-end for this project has its own repository. You can find it here:
-[https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react](https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react)
 
 ## Setup
 
