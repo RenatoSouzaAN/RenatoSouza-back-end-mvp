@@ -13,6 +13,7 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
     -   [Explanation](#explanation)
+    -   [Docker](#docker)
 -   [Running the Server](#running-the-server)
 -   [API Documentation](#api-documentation)
 -   [API Endpoints](#api-endpoints)
@@ -125,7 +126,26 @@ These commands (`flask db init`, `flask db migrate`, `flask db upgrade`) are use
 
 These steps are crucial whenever you make changes to your database models (`models.py` in this case) to ensure that your database schema stays up-to-date with your application's data model.
 
-### Running the Server
+### How to execute through Docker
+
+Certify that you have [Docker](https://docs.docker.com/engine/install/) installed and running in your machine.
+
+Go to the directory that contains the Dockerfile and requirements.txt in your terminal.
+Executa **as administrator** the following command to build the docker image:
+
+```
+$ docker build -t renatosouza-back-end-mvp .
+```
+
+Once the image is created, to run the container, you have to, **as an administrator**, run the following command:
+
+```
+$ docker run -p 5000:5000 rest-api
+```
+
+Once running, to access the API, open [http://localhost:5000/](http://localhost:5000/) in your browser. If you have the front-end repository downloaded, you can also run it now to test the whole project.
+
+## Running the Server (Locally)
 
 To start the Flask server:
 
