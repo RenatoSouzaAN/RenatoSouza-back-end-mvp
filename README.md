@@ -60,7 +60,7 @@ This back-end is built using the following technologies:
 ## Front-end Repository
 
 The front-end for this project has its own repository. You can find it here:
-[https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react](https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react)
+[https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react](https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react)
 
 ## Setup
 
