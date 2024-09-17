@@ -1,3 +1,7 @@
+# DMarket Structure
+
+![Dmarket drawio](https://github.com/user-attachments/assets/84537415-65f1-4024-b06d-8765cf9f8681)
+
 # Back-End (API) MVP
 
 This API is a Flask-based RESTful API for managing products in a market database. It includes user authentication, admin functionality, and CRUD operations for products. The API is documented using OpenAPI 3 and is designed to work with a separate front-end application.
