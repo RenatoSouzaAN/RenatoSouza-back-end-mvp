@@ -59,6 +59,7 @@ This back-end is built using the following technologies:
 -   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
 -   **Authlib**: OAuth and OpenID Connect library for Python.
 -   **SQLite**: Lightweight, serverless database engine.
+-   **Docker**: Platform for developing, shipping, and running applications in containers.
 
 ## Setup
 
