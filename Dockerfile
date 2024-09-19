@@ -17,6 +17,9 @@ COPY . .
 ENV FLASK_APP=run.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
+# Remove existing database files and migrations if they exist
+RUN rm -rf migrations instance dmarket.db
+
 # Inicializa o banco de dados e aplica as migrações
 RUN flask db init && \
     flask db migrate && \
