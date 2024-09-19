@@ -91,13 +91,15 @@ It's highly recommended to use a virtual environment.
    API_MANAGEMENT_CLIENT_SECRET=your-auth0-management-client-secret
    ```
 
-3. Create virtual environment (Optional):
+3.  If you're using docker, there's no need to do the steps below (4 to 7) and you should instead follow [Docker](#docker) instructions
+
+4. Create virtual environment (Optional):
 
     ```
     python -m venv env
     ```
 
-4. Access virtual environment (Optional):
+5. Access virtual environment (Optional):
 
     On Powershell:
 
@@ -111,13 +113,13 @@ It's highly recommended to use a virtual environment.
     source \env\Scripts\activate
     ```
 
-5. Install dependencies:
+6. Install dependencies:
 
     ```
     pip install -r requirements.txt
     ```
 
-6. Set up the database:
+7. Set up the database:
     ```
     flask db init
     flask db migrate
