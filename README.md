@@ -1,17 +1,20 @@
+# DMarket Structure
+
+![Dmarket drawio](https://github.com/user-attachments/assets/84537415-65f1-4024-b06d-8765cf9f8681)
+
 # Back-End (API) MVP
 
 This API is a Flask-based RESTful API for managing products in a market database. It includes user authentication, admin functionality, and CRUD operations for products. The API is documented using OpenAPI 3 and is designed to work with a separate front-end application.
 
 The front-end has its own repository; the link is provided below.
 
-Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react
+Front-end repository: [https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp-react](https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react)
 
 ## Table of Contents
 
 -   [About](#about)
 -   [Features](#features)
 -   [Technology Stack](#technology-stack)
--   [Front-end Repository](#front-end-repository)
 -   [Setup](#setup)
     -   [Prerequisites](#prerequisites)
     -   [Installation](#installation)
@@ -35,7 +38,7 @@ Front-end repository: https://github.com/RenatoSouzaAN/RenatoSouza/front-end-mvp
 
 ## About
 
-This back-end API manages market products and supports user authentication with Auth0. It's built with Flask and supports operations like adding, updating, and deleting products. Admin functionality is also included for managing users. It works alongside a separate front-end, linked below.
+This back-end API manages market products and supports user authentication with Auth0. It's built with Flask and supports operations like adding, updating, and deleting products. Admin functionality is also included for managing users. It works alongside a separate front-end, linked above.
 
 ## Features
 
@@ -56,11 +59,7 @@ This back-end is built using the following technologies:
 -   **Flask-OpenAPI3**: OpenAPI 3 integration for API documentation.
 -   **Authlib**: OAuth and OpenID Connect library for Python.
 -   **SQLite**: Lightweight, serverless database engine.
-
-## Front-end Repository
-
-The front-end for this project has its own repository. You can find it here:
-[https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react](https://github.com/RenatoSouzaAN/renatosouza-front-end-mvp-react)
+-   **Docker**: Platform for developing, shipping, and running applications in containers.
 
 ## Setup
 
