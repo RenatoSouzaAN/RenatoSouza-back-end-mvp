@@ -227,4 +227,4 @@ This API uses Auth0 for authentication. Users need to authenticate through the `
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Custom Code License Agreement. See the [LICENSE](./LICENSE) file for more details.
