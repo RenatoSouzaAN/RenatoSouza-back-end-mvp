@@ -1,21 +1,22 @@
-MIT License
+Custom Code License Agreement
 
+1. Definitions
+"Code" refers to the source code, scripts, configurations, and associated files contained within this repository.
+"You" and "Your" refer to the licensee.
+"Derivative Works" are modifications or adaptations of the Code.
+2. License Grant
+Subject to compliance with this Agreement:
+(a) Internal Use: You are granted a license to copy, compile, install, and use the Code and Derivative Works solely for Your internal purposes.
+
+This use must not expose or provide access, directly or indirectly (e.g., via wrappers), to the Code’s APIs, interfaces, or functionality to any third party, except for employees or contractors acting on Your behalf.
+(b) Prohibitions: Commercial use, resale, distribution, or sublicensing of the Code or Derivative Works is prohibited without prior written consent.
+
+3. Restrictions
+You may not bypass, alter, or remove license terms embedded in the Code.
+You may not use the Code to create a competing product.
+
+4. Copyright Notice
 Copyright (c) 2024 Renato Souza
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+5. Disclaimer of Warranty
+THE CODE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
